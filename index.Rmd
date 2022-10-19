@@ -1,6 +1,6 @@
 ---
 title: "My Final Project Template"
-author: Your name here
+author: Yue Ma
 subtitle: Subtitle here if desired
 ---
 
@@ -8,7 +8,7 @@ subtitle: Subtitle here if desired
 
 [~ 200 words]
 
-Clearly stated background and questions / hypotheses / problems being addressed. Sets up the analysis in an interesting and compelling way.
+Time series data is of tremendous importance in the field of environmental sustainability. Exploring this kind of data helps us understand the pattern of ecosystems, which allows us to detect the abnormal changes in time and help the relative department to make decisions. In this study, I will compare the performances of two state-of-the-art time series classification (TSC) models, fully convectional neural network (FCN) and deep Residual Network (ResNet).
 
 # Materials and methods
 
@@ -50,6 +50,8 @@ knitr::opts_chunk$set(cache=TRUE)  # cache the results for quick compiling
 ```
 
 ## Download and clean all required data
+Here, I load all the NDVI data and compact them as one three-dimensional array. I firstly go through the data to check if there is any N.A or infinity values in the array. If there are infinity values, replace them with N.A values. 
+
 ```{r}
 n=20
 data=data.frame(x=runif(n,-180,180),
@@ -60,7 +62,7 @@ data=data.frame(x=runif(n,-180,180),
                   ),
                 value = rnorm(n))
 ```
-
+After the replace step, I normalize the NDVI value to the value range [-1,1].
 ```{r, results='asis'}
 data %>% 
   slice(1:10) %>% #show only 1:n rows
@@ -69,7 +71,27 @@ data %>%
                   c("striped", "hover", "condensed", "responsive")) #apply other formatting
 ```
 
-Add any additional processing steps here.
+Then I load the environmental variables and check if there is any N.A or infinity data as well. If there are infinity values, replace them with N.A values. Then normalize the environmental variables to the value range (0,1]. 
+
+Replace all the N.A values with 0 and compact them as one array.
+
+## build the training and testing dataset
+
+Load the land cover classification dataset and compare the value of each pixel from year to year. Save the location of pixels which don't change during the study period and build a mask based on these pixels.
+
+Use the mask to filter out the pixels in the compacted time series dataset. Then filter out all the pixels who have 0 in their environmental variables.
+
+Convert the 3-dimensional dataset to 2-dimensional dataset. After this, add labels to the 2-dimensional dataset. Then use continuous numbers to replace the original label numbers.
+
+Randomly split the dataset (75%-25%) as training dataset and testing dataset.
+
+## build and train the model
+Build the FCN model and train it with the training dataset.
+
+Build the ResNet model and train it with the training dataset.
+
+Test the models with testing dataset, and evaluate them.
+
 
 # Results
 
