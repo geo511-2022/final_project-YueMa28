@@ -65,7 +65,7 @@ The deep learning models used in this paper is proposed in XXX Wang's paper in 2
 4) discussion:
 Based on the results I get from the previous step, the performances of these two models are analyzed and the results have referential significance to relative studies.
 
-
+![](https://github.com/geo511-2022/final_project-YueMa28/blob/master/flowwork.png)
 
 
 # Expected results
