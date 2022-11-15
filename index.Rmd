@@ -1,80 +1,659 @@
 ---
-title: "My Final Project Template"
+title: "what does time tell"
 author: Yue Ma
-subtitle: Subtitle here if desired
+subtitle: Using time series data to train deep learning models for classification
 ---
 
 # Introduction
-
-[~ 200 words]
 
 Time series data is of tremendous importance in the field of environmental sustainability. Exploring this kind of data helps us understand the pattern of ecosystems, which allows us to detect the abnormal changes in time and help the relative department to make decisions. In this study, I will compare the performances of two state-of-the-art time series classification (TSC) models, fully convectional neural network (FCN) and deep Residual Network (ResNet).
 
 # Materials and methods
 
-[~ 200 words]
+This study can be divided into four parts:
 
-Narrative: Clear narrative description of the data sources and methods. Includes data from at least two sources that were integrated / merged in R.
+1) data collection and pre-processing: 
+In this part, I collected the aforementioned data and normalized them into the same value range (Except the NDVI data). The normalized value range for the NDVI data is [-1,1], while the normalized value range for the other environmental variables is (0,1]. 
 
-Code: The code associated with the project is well organized and easy to follow. Demonstrates mastery of R graphics and functions.
+2) build training and testing data sets:
+Based the land cover classification data, I select pixels that do not change during the study period and build a mask based on them. This mask is then applied to select pixels from the NDVI and environmental variables data. Then the label from the classification data and the data from previous step are combined together and then splited into training and testing datasets.
 
-Data: The underlying data are publicly accessible via the web and downloaded/accessed within the Rmd script. If you want to use your own data, you must make it available on a website (e.g. Figshare) so that others are able to re-run your code.
+3) build and train deep learning models:
+The deep learning models used in this paper is proposed in XXX Wang's paper in 2017. In this paper, I keep the original structures of the models in the paper and 
 
-You can do bullets like this:
+4) discussion:
+Based on the results I get from the previous step, the performances of these two models are analyzed and the results have referential significance to relative studies.
 
-* The first most important thing
-* The second most important thing
-* The third most important thing
+![](https://github.com/geo511-2022/final_project-YueMa28/blob/master/flowwork.png)
 
-You can do numbers like this:
+## Before the code
 
-1. The first most important thing
-2. The second most important thing
-3. The third most important thing
+In this study I planned to use ten years as the study period, however the large size of dataset would run into 'Error: vector memory exhausted (limit reached?)' Error. So on this website, I will only use one year as the study period. If you are interested in the original code, please copy and paste the commented parts of code and run them on a powerful server.
 
-See [http://rmarkdown.rstudio.com/](http://rmarkdown.rstudio.com/) for all the amazing things you can do.
+## Demo (using data from 2018 as an example)
 
-
-Here's my first code chunk.
-```{r}
-1+2
-```
-
-Load any required packages in a code chunk (you may need to install some packages):
+Here I list all the packages that I used in this study.
 
 ```{r, message=F, warning=F}
-library(tidyverse)
-library(leaflet)
-library(kableExtra)
+library(tensorflow)
+library(raster)
+library(lubridate)
+library(keras)
+library(sp)
+library(timechange)
+library(plot3D)
+library(ggplot2)
+library(piggyback)
+library(dst)
+library(reticulate)
+library(countcolors)
 knitr::opts_chunk$set(cache=TRUE)  # cache the results for quick compiling
+library(downloader)
+temp_directory <- '/Users/mayue/Downloads/'
+ndvi_directory <- '/Users/mayue/Downloads/final_project-YueMa28/raw_ndvi_modis'
+env_directory <- '/Users/mayue/Downloads/final_project-YueMa28/env_data'
+UBbox_directory <- "/Users/mayue/Box Sync/YueMa/Time series classification"
+
 ```
+
+## Creat time series to collect data from github
+In this part we collected the time series data from Dr. Wilson's github.
+
+```{r}
+
+#year_list = c('2009','2010','2011','2012','2013','2014','2015','2016','2017','2018')
+
+
+#date_list = list() 
+
+#count <- 1
+#for(i in year_list){ 
+#  ss <- as.Date(paste(i,'-01-01',sep=''))
+#  dates <- seq(from=ss, by=32, length.out=12)
+#  for(j in 1:12){
+#    temp <- format(dates[[j]], format = '%Y_%m_%d')
+#   date_list[[count]] <- temp
+#    count <- count + 1
+#  }
+#} 
+
+#date_list
+
+date_list = list() 
+
+ss <- as.Date(paste(2018,'-01-01',sep=''))
+dates <- seq(from=ss, by=32, length.out=12)
+for(j in 1:12){
+  temp <- format(dates[[j]], format = '%Y_%m_%d')
+  date_list[[j]] <- temp
+}
+
+date_list
+
+
+```
+
 
 ## Download and clean all required data
 Here, I load all the NDVI data and compact them as one three-dimensional array. I firstly go through the data to check if there is any N.A or infinity values in the array. If there are infinity values, replace them with N.A values. 
 
 ```{r}
-n=20
-data=data.frame(x=runif(n,-180,180),
-                y=runif(n,-60,60),
-                size = runif(n, 5, 20),
-                category = factor(
-                  sample(letters[1:5], n, replace = TRUE)
-                  ),
-                value = rnorm(n))
+#ndvi_arr <- array(dim=c(1634,2035,120))
+
+#for(i in 1:120){
+#  sample_data = download.file(url = #paste("https://github.com/AdamWilsonLab/emma_envdata/releases/download/raw_ndvi_modis/" ,date_list[[i]],".tif",sep=''),
+#                             destfile = file.path(temp_directory,paste("raw_ndvi_modis",date_list[[i]],".tif",sep = "")))
+# rast_i <- terra::rast(file.path(temp_directory,paste("raw_ndvi_modis",date_list[[i]],".tif",sep = "")))
+# ndvi_arr[,,i] <- rast_i[,,1]
+# print(date_list[[i]])
+#}
+
+#print(paste("There are nan values in NDVI data: ",as.character(NaN %in% ndvi_arr,seq='')))
+#print(paste("There are infinitive values in NDVI data: ",as.character(Inf %in% ndvi_arr,seq='')))
+
+#print(paste("The min value of NDVI data (without nan): ",min(ndvi_arr,na.rm = TRUE)))
+#print(paste("The max value of NDVI data (without nan): ",max(ndvi_arr,na.rm = TRUE)))
+
+
+ndvi_arr <- array(dim=c(1634,2035,12))
+
+for(i in 1:12){
+  sample_data <- pb_download(paste(date_list[[i]],'.tif',sep = ''),
+            repo = "AdamWilsonLab/emma_envdata",
+            tag = "raw_ndvi_modis",
+            #dest = tempdir(),
+            dest = file.path(ndvi_directory)
+            )
+  rast_i <- terra::rast(file.path(ndvi_directory,paste(date_list[[i]],".tif",sep = "")))
+  ndvi_arr[,,i] <- rast_i[,,1]
+  print(date_list[[i]])
+}
+
+print(paste("There are nan values in NDVI data: ",as.character(NaN %in% ndvi_arr,seq='')))
+print(paste("There are infinitive values in NDVI data: ",as.character(Inf %in% ndvi_arr,seq='')))
+
+print(paste("The min value of NDVI data (without nan): ",min(ndvi_arr,na.rm = TRUE)))
+print(paste("The max value of NDVI data (without nan): ",max(ndvi_arr,na.rm = TRUE)))
 ```
 After the replace step, I normalize the NDVI value to the value range [-1,1].
-```{r, results='asis'}
-data %>% 
-  slice(1:10) %>% #show only 1:n rows
-  kable(digits=2,align="c")%>% #make table and round to two digits
-  kable_styling(bootstrap_options = 
-                  c("striped", "hover", "condensed", "responsive")) #apply other formatting
+```{r}
+ndvi_arr_norm = (ndvi_arr-100)/100
+print(paste("The min value of normalized NDVI data (without nan): ",min(ndvi_arr_norm,na.rm = TRUE)))
+print(paste("The max value of normalized NDVI data (without nan): ",max(ndvi_arr_norm,na.rm = TRUE)))
+```
+```{r}
+
+
+test_arr <- ndvi_arr_norm[,,1]
+test_arr <- array_reshape(test_arr, c(1634, 2035,1))
+
+shape(test_arr)
+
+plotArrayAsImage(test_arr)
+
+mnist <- dataset_mnist()
+X_train <- mnist$train$x
+X_test <- mnist$test$x
+y_train <- mnist$train$y
+y_test <- mnist$test$y
+
+```
+# collect the environmental data
+Here I download three static environmental data.
+```{r}
+# get the environmental data
+env_arr <- array(dim=c(1634,2035,3))
+
+dem_data <- pb_download('nasadem.tif',
+            repo = "AdamWilsonLab/emma_envdata",
+            tag = "processed_static",
+            #dest = tempdir(),
+            dest = file.path(env_directory)
+            )
+dem_arr <- terra::rast(file.path(env_directory,'nasadem.tif'))
+env_arr[,,1] <- dem_arr[,,1]
+
+
+soil_data <- pb_download('soil_Total_N_.tif',
+            repo = "AdamWilsonLab/emma_envdata",
+            tag = "processed_static",
+            #dest = tempdir(),
+            dest = file.path(env_directory)
+            )
+
+soil_arr <- terra::rast(file.path(env_directory,'soil_Total_N_.tif'))
+
+env_arr[,,2] <- soil_arr[,,1]
+
+conc_data <- pb_download('MODCF_seasonality_concentration.tif',
+            repo = "AdamWilsonLab/emma_envdata",
+            tag = "processed_static",
+            #dest = tempdir(),
+            dest = file.path(env_directory)
+            )
+
+conc_arr <- terra::rast(file.path(env_directory,'MODCF_seasonality_concentration.tif'))
+
+env_arr[,,3] <- conc_arr[,,1]
+
+
+print(paste("There are nan values in static data: ",as.character(NaN %in% env_arr,seq='')))
+print(paste("There are infinitive values in static data: ",as.character(Inf %in% env_arr,seq='')))
+
+print(paste("The min value of static data (without nan): ",min(env_arr,na.rm = TRUE)))
+print(paste("The max value of static data (without nan): ",max(env_arr,na.rm = TRUE)))
+
+```
+
+
+Here I defined a normalize function to make the variables' value ranges fall into (0,1]
+```{r}
+MaxMinNormalization <- function(x, norm_min, norm_max){
+  x = (x - norm_min) / (norm_max - norm_min)
+  return (x)
+}
 ```
 
 Then I load the environmental variables and check if there is any N.A or infinity data as well. If there are infinity values, replace them with N.A values. Then normalize the environmental variables to the value range (0,1]. 
 
 Replace all the N.A values with 0 and compact them as one array.
+```{r}
+norm_covariates <- array(dim=c(1634,2035,3))
 
+for(i in 1:3){
+  norm_covariates[,,i] = MaxMinNormalization(env_arr[,,i],min(env_arr[,,i],na.rm = TRUE)-1,max(env_arr[,,i],na.rm = TRUE)+1)
+}
+
+print(paste("The min value of normalized static data (without nan): ",min(norm_covariates,na.rm = TRUE)))
+print(paste("The max value of normalized static data (without nan): ",max(norm_covariates,na.rm = TRUE)))
+```
+
+```{r}
+#month <- c("01","02","03","04","05","06","07","08","09","10","11","12")
+
+#prec_arr <- array(dim=c(1634,2035,120))
+#current_time = 1
+
+#for(y in 2009:2018){
+#  for(m in month){
+#    current_pr = terra::rast(file.path(UBbox_directory,paste("clipped_env/pr/pr_",m,"_",as.character(y),".tif",sep = "")))
+#    resam = terra::rast(nrows=1634, ncols=2035,nlyrs=1)
+#    pr_res = resample(current_pr,resam,method='bilinear')
+#    prec_arr[,,current_time] = pr_res[,,1]
+#    current_time = current_time + 1
+#  }
+#}
+
+#print(paste("There are nan values in precipitation data: ",as.character(NaN %in% prec_arr,seq='')))
+#print(paste("There are infinitive values in precipitation data: ",as.character(Inf %in% prec_arr,seq='')))
+
+#print(paste("The min value of precipitation data (without nan): ",min(prec_arr,na.rm = TRUE)))
+#print(paste("The max value of precipitation data (without nan): ",max(prec_arr,na.rm = TRUE)))
+
+
+
+
+month <- c("01","02","03","04","05","06","07","08","09","10","11","12")
+
+prec_arr <- array(dim=c(1634,2035,12))
+
+current_time = 1
+
+for(m in month){
+  current_pr = terra::rast(file.path(UBbox_directory,paste("clipped_env/pr/pr_",m,"_2018.tif",sep = "")))
+  resam = terra::rast(nrows=1634, ncols=2035,nlyrs=1)
+  pr_res = terra::resample(current_pr,resam,method='bilinear')
+  prec_arr[,,current_time] = pr_res[,,1]
+  current_time = current_time + 1
+}
+
+
+
+
+print(paste("There are nan values in precipitation data: ",as.character(NaN %in% prec_arr,seq='')))
+print(paste("There are infinitive values in precipitation data: ",as.character(Inf %in% prec_arr,seq='')))
+
+print(paste("The min value of precipitation data (without nan): ",min(prec_arr,na.rm = TRUE)))
+print(paste("The max value of precipitation data (without nan): ",max(prec_arr,na.rm = TRUE)))
+
+```
+
+```{r}
+#norm_pr <- array(dim=c(1634,2035,120))
+
+#for(i in 1:120){
+#  norm_pr[,,i] = MaxMinNormalization(prec_arr[,,i],min(prec_arr[,,i],na.rm = TRUE)-1,max(prec_arr[,,i],na.rm = TRUE)+1)
+#}
+
+#print(paste("The min value of normalized precipitation data (without nan): ",min(norm_pr,na.rm = TRUE)))
+#print(paste("The max value of normalized precipitation data (without nan): ",max(norm_pr,na.rm = TRUE)))
+
+
+norm_pr <- array(dim=c(1634,2035,12))
+
+for(i in 1:12){
+  norm_pr[,,i] = MaxMinNormalization(prec_arr[,,i],min(prec_arr[,,i],na.rm = TRUE)-1,max(prec_arr[,,i],na.rm = TRUE)+1)
+}
+
+print(paste("The min value of normalized precipitation data (without nan): ",min(norm_pr,na.rm = TRUE)))
+print(paste("The max value of normalized precipitation data (without nan): ",max(norm_pr,na.rm = TRUE)))
+
+```
+```{r}
+#rsds_arr <- array(dim=c(1634,2035,120))
+#current_time_rsds = 1
+
+#for(y in 2009:2018){
+#  for(m in month){
+#    current_rsds = terra::rast(file.path(UBbox_directory,paste("clipped_env/rsds/rsds_",m,"_",as.character(y),".tif",sep = "")))
+#   resam = terra::rast(nrows=1634, ncols=2035,nlyrs=1)
+#    rsds_res = resample(current_rsds,resam,method='bilinear')
+#    rsds_arr[,,current_time_rsds] = rsds_res[,,1]
+#    current_time_rsds = current_time_rsds + 1
+#  }
+#}
+
+#print(paste("There are nan values in downwelling shortwave flux data: ",as.character(NaN %in% rsds_arr,seq='')))
+#print(paste("There are infinitive values in downwelling shortwave flux data: ",as.character(Inf %in% rsds_arr,seq='')))
+
+#print(paste("The min value of downwelling shortwave flux data (without nan): ",min(rsds_arr,na.rm = TRUE)))
+#print(paste("The max value of downwelling shortwave flux data (without nan): ",max(rsds_arr,na.rm = TRUE)))
+
+
+
+
+rsds_arr <- array(dim=c(1634,2035,12))
+current_time_rsds = 1
+
+  for(m in month){
+    current_rsds = terra::rast(file.path(UBbox_directory,paste("clipped_env/rsds/rsds_",m,"_2018.tif",sep = "")))
+    resam = terra::rast(nrows=1634, ncols=2035,nlyrs=1)
+    rsds_res = terra::resample(current_rsds,resam,method='bilinear')
+    rsds_arr[,,current_time_rsds] = rsds_res[,,1]
+    current_time_rsds = current_time_rsds + 1
+}
+
+print(paste("There are nan values in downwelling shortwave flux data: ",as.character(NaN %in% rsds_arr,seq='')))
+print(paste("There are infinitive values in downwelling shortwave flux data: ",as.character(Inf %in% rsds_arr,seq='')))
+
+print(paste("The min value of downwelling shortwave flux data (without nan): ",min(rsds_arr,na.rm = TRUE)))
+print(paste("The max value of downwelling shortwave flux data (without nan): ",max(rsds_arr,na.rm = TRUE)))
+
+```
+
+```{r}
+#norm_rsds <- array(dim=c(1634,2035,120))
+
+#for(i in 1:120){
+#  norm_rsds[,,i] = MaxMinNormalization(rsds_arr[,,i],min(rsds_arr[,,i],na.rm = TRUE)-1,max(rsds_arr[,,i],na.rm = TRUE)+1)
+#}
+
+
+#print(paste("The min value of downwelling shortwave flux data (without nan): ",min(norm_rsds,na.rm = TRUE)))
+#print(paste("The max value of downwelling shortwave flux data (without nan): ",max(norm_rsds,na.rm = TRUE)))
+
+
+
+norm_rsds <- array(dim=c(1634,2035,12))
+
+for(i in 1:12){
+  norm_rsds[,,i] = MaxMinNormalization(rsds_arr[,,i],min(rsds_arr[,,i],na.rm = TRUE)-1,max(rsds_arr[,,i],na.rm = TRUE)+1)
+}
+
+
+print(paste("The min value of normalized downwelling shortwave flux data (without nan): ",min(norm_rsds,na.rm = TRUE)))
+print(paste("The max value of normalized downwelling shortwave flux data (without nan): ",max(norm_rsds,na.rm = TRUE)))
+
+```
+
+```{r}
+
+#tas_arr <- array(dim=c(1634,2035,120))
+#current_time_tas = 1
+
+#for(y in 2009:2018){
+#  for(m in month){
+#    current_tas = terra::rast(file.path(temp_directory,paste("clipped_env/tas/tas_",m,"_",as.character(y),".tif",sep = "")))
+#    resam = terra::rast(nrows=1634, ncols=2035,nlyrs=1)
+#    tas_res = resample(current_tas,resam,method='bilinear')
+#    tas_arr[,,current_time_tas] = tas_res[,,1]
+#    current_time_tas = current_time_tas + 1
+#  }
+#}
+
+
+
+tas_arr <- array(dim=c(1634,2035,12))
+current_time_tas = 1
+
+
+for(m in month){
+  current_tas = terra::rast(file.path(UBbox_directory,paste("clipped_env/tas/tas_",m,"_2018.tif",sep = "")))
+  resam = terra::rast(nrows=1634, ncols=2035,nlyrs=1)
+  tas_res = terra::resample(current_tas,resam,method='bilinear')
+  tas_arr[,,current_time_tas] = tas_res[,,1]
+  current_time_tas = current_time_tas + 1
+}
+
+print(paste("There are nan values in mean daily airtemperature data: ",as.character(NaN %in% rsds_arr,seq='')))
+print(paste("There are infinitive values in mean daily air temperature data: ",as.character(Inf %in% rsds_arr,seq='')))
+
+print(paste("The min value of mean daily air temperature data (without nan): ",min(rsds_arr,na.rm = TRUE)))
+print(paste("The max value of mean daily air temperature data (without nan): ",max(rsds_arr,na.rm = TRUE)))
+
+
+```
+
+```{r}
+#norm_tas <- array(dim=c(1634,2035,120))
+
+#for(i in 1:120){
+#  norm_tas[,,i] = MaxMinNormalization(tas_arr[,,i],min(tas_arr[,,i],na.rm = TRUE)-1,max(tas_arr[,,i],na.rm = TRUE)+1)
+#}
+
+#print(paste("The min value of normalized mean daily air temperature data (without nan): ",min(norm_rsds,na.rm = TRUE)))
+#print(paste("The max value of normalized mean daily air temperature data (without nan): ",max(norm_rsds,na.rm = TRUE)))
+
+
+norm_tas <- array(dim=c(1634,2035,12))
+
+for(i in 1:12){
+  norm_tas[,,i] = MaxMinNormalization(tas_arr[,,i],min(tas_arr[,,i],na.rm = TRUE)-1,max(tas_arr[,,i],na.rm = TRUE)+1)
+}
+
+print(paste("The min value of normalized mean daily air temperature data (without nan): ",min(norm_rsds,na.rm = TRUE)))
+print(paste("The max value of normalized mean daily air temperature data (without nan): ",max(norm_rsds,na.rm = TRUE)))
+```
+
+
+```{r}
+#all_variables <- array(dim=c(1634,2035,120,7))
+
+#for(i in 1:120){
+#  all_variables[,,i,1] = ndvi_arr_norm[,,i]
+#  all_variables[,,i,2] = env_arr[,,1]
+#  all_variables[,,i,3] = env_arr[,,2]
+#  all_variables[,,i,4] = env_arr[,,3]
+#  all_variables[,,i,5] = norm_pr[,,i]
+#  all_variables[,,i,6] = norm_rsds[,,i]
+#  all_variables[,,i,7] = norm_tas[,,i]
+#}
+
+
+all_variables <- array(dim=c(1634,2035,12,7))
+
+for(i in 1:12){
+  for(m in 1:1634){
+    for(n in 1:2035){
+        all_variables[m,n,i,1] = ndvi_arr_norm[m,n,i]
+        all_variables[m,n,i,2] = env_arr[m,n,1]
+        all_variables[m,n,i,3] = env_arr[m,n,2]
+        all_variables[m,n,i,4] = env_arr[m,n,3]
+        all_variables[m,n,i,5] = norm_pr[m,n,i]
+        all_variables[m,n,i,6] = norm_rsds[m,n,i]
+        all_variables[m,n,i,7] = norm_tas[m,n,i]
+    }
+  }
+
+}
+
+```
+
+```{r}
+all_variables_mask <- array(dim=c(1634,2035))
+
+
+
+for(m in 1:1634){
+  for(n in 1:2035){
+    #found_nan = FALSE
+    if(NaN %in% all_variables[m,n,,]){
+      found_nan = TRUE
+      
+    }
+    else{
+      found_nan = FALSE
+    }
+    
+    if(found_nan){
+      all_variables_mask[m,n] <- -1
+    }
+    else{
+      all_variables_mask[m,n] <- 1
+    }
+  }
+}
+count
+NaN %in% all_variables[1634,2035,,]
+all_variables_mask[11,12]
+1 %in% all_variables_mask
+```
+
+```{r}
+class_arr <- array(dim=c(1634,2035,10))
+
+year = c("09","10","11","12","13","14","15","16","17","18")
+
+for(y in 1:10){
+  current_class = terra::rast(file.path(temp_directory,paste("africa_classification_CFR/",year[[y]],"_CFR.tif",sep = "")))
+  class_arr[,,y] = current_class[,,1]
+}
+
+class_mask <- array(dim = c(1634,2035))
+
+for(m in 1:1634){
+  for(n in 1:2035){
+    found_change = FALSE
+    for(t in 1:10){
+      if(class_arr[m,n,1] != class_arr[m,n,t] || class_arr[m,n,1] == 0 ){
+        found_change = TRUE
+        break
+      }
+    }
+    if(found_change){
+      class_mask[m,n] = -1
+    }
+    else{
+      class_mask[m,n] = 1
+    }
+  }
+}
+
+
+```
+
+```{r}
+combine_mask = array(dim = c(1634,2035))
+
+for(m in 1:1634){
+  for(n in 1:2035){
+    if(all_variables_mask[m,n] == 1 && class_mask[m,n] == 1){
+      combine_mask[m,n] = 1
+    }
+    else{
+      combine_mask[m,n] = -1
+    }
+  }
+}
+
+
+```
+
+```{r}
+for(m in 1:1634){
+  for(n in 1:2035){
+    if(all_variables_mask[m,n] == 1 && class_mask[m,n] == 1){
+      combine_mask[m,n] = 1
+    }
+    else{
+      combine_mask[m,n] = -1
+    }
+  }
+}
+
+1 %in% all_variables_mask
+
+valid_number <- 0
+for(i in 1:1634){
+  for(j in 1:2035){
+    if(combine_mask[i,j]==1){
+      valid_number = valid_number + 1
+    }
+    else{
+      next
+    }
+  }
+}
+valid_number
+train_number = as.integer(valid_number*0.75)
+test_number = as.integer(valid_number*0.25)
+```
+
+
+```{r}
+lab_dict = c('20.0'=0,
+             '30.0'=1,
+             '41.0'=2,
+             '42.0'=3,
+             '43.0'=4,
+             '50.0'=5,
+             '60.0'=6,
+             '80.0'=7,
+             '90.0'=8,
+             '112.0'=9,
+             '114.0'=10,
+             '116.0'=11,
+             '124.0'=12,
+             '126.0'=13)
+```
+
+
+```{r}
+#total_dataset = array(c(valid_number,120,7))
+
+#total_label = array(c(valid_number,1))
+
+#total_dataset_count = 1
+
+#for(i in 1:1634){
+#  for(j in 1:2035){
+#    if(combine_mask[i,j] == 1){
+#      total_dataset[total_dataset_count,,] = all_variables[i,j,,]
+#      trans_lab = lab_dict[[as.character(class_arr[i,j,1])]]
+#      total_label[total_dataset_count,1] = trans_lab
+#      total_dataset_count = total_dataset_count+1
+#    }
+#  }
+#}
+
+
+
+total_dataset = array(dim=c(valid_number,12,7))
+
+total_label = array(dim=c(valid_number,1))
+
+total_dataset_count = 1
+
+for(i in 1:1634){
+  for(j in 1:2035){
+    if(combine_mask[i,j] == 1){
+      total_dataset[total_dataset_count,,] = all_variables[i,j,,]
+      trans_lab = lab_dict[[as.character(class_arr[i,j,1])]]
+      total_label[total_dataset_count,1] = trans_lab
+      total_dataset_count = total_dataset_count+1
+    }
+  }
+}
+```
+
+
+```{r}
+valid_number
+total_label
+
+set.seed(10000)
+random_int <- sample(1:valid_number, train_number, replace = FALSE)
+train_dataset = list()
+train_label = list()
+test_dataset = list()
+test_label = list()
+
+total_train_num <- 1
+total_test_num <- 1
+for(i in 1:valid_number){
+  if(i %in% random_int){
+    train_dataset[[total_train_num]] <- total_dataset[,i,]
+    train_label[[total_train_num]] <- total_label[i,]
+    total_train_num = total_train_num + 1
+  }
+  else{
+    test_dataset[[total_test_num]] <- total_dataset[,i,]
+    test_label[[total_test_num]] <- total_label[i,]
+    total_test_num = total_test_num + 1
+  }
+}
+
+```
 ## build the training and testing dataset
 
 Load the land cover classification dataset and compare the value of each pixel from year to year. Save the location of pixels which don't change during the study period and build a mask based on these pixels.
@@ -91,7 +670,25 @@ Build the FCN model and train it with the training dataset.
 Build the ResNet model and train it with the training dataset.
 
 Test the models with testing dataset, and evaluate them.
+```{r}
+FCN_model <- keras_model_sequential()
+FCN_model %>%
+  layer_input(input_shape=c(120,7,1)) %>%
+  layer_conv_2d(128,5,1,padding = 'same') %>%
+  layer_batch_normalization() %>%
+  layer_activation('relu') %>%
+  layer_conv_2d(256,5,1,padding = 'same') %>%
+  layer_batch_normalization() %>%
+  layer_activation('relu') %>%
+  layer_conv_2d(128,3,1,padding = 'same') %>%
+  layer_batch_normalization() %>%
+  layer_activation('relu') %>%
+  layer_average_pooling_2d() %>%
+  layer_dense(14,activation = 'softmax')
 
+summary(FCN_model)
+
+```
 
 # Results
 
