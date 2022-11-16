@@ -125,7 +125,7 @@ for(i in 1:12){
             dest = file.path(ndvi_directory)
             )
   rast_i <- terra::rast(file.path(ndvi_directory,paste(date_list[[i]],".tif",sep = "")))
-  ndvi_arr[,,i] <- rast_i[,,1]
+  ndvi_arr[,,i] <- as.array(rast_i)
   print(date_list[[i]])
 }
 
@@ -135,29 +135,17 @@ print(paste("There are infinitive values in NDVI data: ",as.character(Inf %in% n
 print(paste("The min value of NDVI data (without nan): ",min(ndvi_arr,na.rm = TRUE)))
 print(paste("The max value of NDVI data (without nan): ",max(ndvi_arr,na.rm = TRUE)))
 ```
+```{r}
+image(ndvi_arr[nrow(ndvi_arr):1,,1],asp=1)
+
+```
 After the replace step, I normalize the NDVI value to the value range [-1,1].
 ```{r}
 ndvi_arr_norm = (ndvi_arr-100)/100
 print(paste("The min value of normalized NDVI data (without nan): ",min(ndvi_arr_norm,na.rm = TRUE)))
 print(paste("The max value of normalized NDVI data (without nan): ",max(ndvi_arr_norm,na.rm = TRUE)))
 ```
-```{r}
 
-
-test_arr <- ndvi_arr_norm[,,1]
-test_arr <- array_reshape(test_arr, c(1634, 2035,1))
-
-shape(test_arr)
-
-plotArrayAsImage(test_arr)
-
-mnist <- dataset_mnist()
-X_train <- mnist$train$x
-X_test <- mnist$test$x
-y_train <- mnist$train$y
-y_test <- mnist$test$y
-
-```
 # collect the environmental data
 Here I download three static environmental data.
 ```{r}
@@ -171,7 +159,7 @@ dem_data <- pb_download('nasadem.tif',
             dest = file.path(env_directory)
             )
 dem_arr <- terra::rast(file.path(env_directory,'nasadem.tif'))
-env_arr[,,1] <- dem_arr[,,1]
+env_arr[,,1] <- as.array(dem_arr)
 
 
 soil_data <- pb_download('soil_Total_N_.tif',
@@ -183,7 +171,7 @@ soil_data <- pb_download('soil_Total_N_.tif',
 
 soil_arr <- terra::rast(file.path(env_directory,'soil_Total_N_.tif'))
 
-env_arr[,,2] <- soil_arr[,,1]
+env_arr[,,2] <- as.array(soil_arr)
 
 conc_data <- pb_download('MODCF_seasonality_concentration.tif',
             repo = "AdamWilsonLab/emma_envdata",
@@ -194,7 +182,7 @@ conc_data <- pb_download('MODCF_seasonality_concentration.tif',
 
 conc_arr <- terra::rast(file.path(env_directory,'MODCF_seasonality_concentration.tif'))
 
-env_arr[,,3] <- conc_arr[,,1]
+env_arr[,,3] <- as.array(conc_arr)
 
 
 print(paste("There are nan values in static data: ",as.character(NaN %in% env_arr,seq='')))
@@ -263,7 +251,7 @@ for(m in month){
   current_pr = terra::rast(file.path(UBbox_directory,paste("clipped_env/pr/pr_",m,"_2018.tif",sep = "")))
   resam = terra::rast(nrows=1634, ncols=2035,nlyrs=1)
   pr_res = terra::resample(current_pr,resam,method='bilinear')
-  prec_arr[,,current_time] = pr_res[,,1]
+  prec_arr[,,current_time] = as.array(pr_res)
   current_time = current_time + 1
 }
 
@@ -329,7 +317,7 @@ current_time_rsds = 1
     current_rsds = terra::rast(file.path(UBbox_directory,paste("clipped_env/rsds/rsds_",m,"_2018.tif",sep = "")))
     resam = terra::rast(nrows=1634, ncols=2035,nlyrs=1)
     rsds_res = terra::resample(current_rsds,resam,method='bilinear')
-    rsds_arr[,,current_time_rsds] = rsds_res[,,1]
+    rsds_arr[,,current_time_rsds] = as.array(rsds_res)
     current_time_rsds = current_time_rsds + 1
 }
 
@@ -391,7 +379,7 @@ for(m in month){
   current_tas = terra::rast(file.path(UBbox_directory,paste("clipped_env/tas/tas_",m,"_2018.tif",sep = "")))
   resam = terra::rast(nrows=1634, ncols=2035,nlyrs=1)
   tas_res = terra::resample(current_tas,resam,method='bilinear')
-  tas_arr[,,current_time_tas] = tas_res[,,1]
+  tas_arr[,,current_time_tas] = as.array(tas_res)
   current_time_tas = current_time_tas + 1
 }
 
