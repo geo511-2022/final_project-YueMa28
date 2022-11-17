@@ -47,6 +47,7 @@ library(piggyback)
 library(dst)
 library(reticulate)
 library(countcolors)
+library(tidyterra)
 knitr::opts_chunk$set(cache=TRUE)  # cache the results for quick compiling
 library(downloader)
 temp_directory <- '/Users/mayue/Downloads/'
@@ -114,8 +115,28 @@ Here, I load all the NDVI data and compact them as one three-dimensional array. 
 #print(paste("The min value of NDVI data (without nan): ",min(ndvi_arr,na.rm = TRUE)))
 #print(paste("The max value of NDVI data (without nan): ",max(ndvi_arr,na.rm = TRUE)))
 
+NDVI_filelist = c()
 
+for(i in 1:12){
+  NDVI_filelist[i] = paste('/Users/mayue/Downloads/final_project-YueMa28/raw_ndvi_modis/',date_list[i],'.tif' ,sep="")
+}
+
+temp_rasters <- terra::rast(NDVI_filelist)
+names(temp_rasters) <- c(1:12)
+#temp_rasters_df <- as.data.frame(temp_rasters, xy = TRUE) 
+str(temp_rasters_df)
+
+
+ggplot() +
+  geom_spatraster(data=temp_rasters,maxcell = 100) +
+  facet_wrap(~lyr, ncol = 4) 
+
+
+
+/*
 ndvi_arr <- array(dim=c(1634,2035,12))
+
+
 
 for(i in 1:12){
   sample_data <- pb_download(paste(date_list[[i]],'.tif',sep = ''),
@@ -128,7 +149,7 @@ for(i in 1:12){
   ndvi_arr[,,i] <- as.array(rast_i)
   print(date_list[[i]])
 }
-
+*/
 print(paste("There are nan values in NDVI data: ",as.character(NaN %in% ndvi_arr,seq='')))
 print(paste("There are infinitive values in NDVI data: ",as.character(Inf %in% ndvi_arr,seq='')))
 
