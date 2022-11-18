@@ -60,7 +60,6 @@ In this part we collected the time series data from Dr. Wilson's github.
 
 #year_list = c('2009','2010','2011','2012','2013','2014','2015','2016','2017','2018')
 
-
 #date_list = list() 
 
 #count <- 1
@@ -94,113 +93,141 @@ date_list
 ## Download and clean all required data
 Here, I load all the NDVI data and compact them as one three-dimensional array. I firstly go through the data to check if there is any N.A or infinity values in the array. If there are infinity values, replace them with N.A values. 
 
-```{r}
-#ndvi_arr <- array(dim=c(1634,2035,120))
 
-#for(i in 1:120){
-#  sample_data = download.file(url = #paste("https://github.com/AdamWilsonLab/emma_envdata/releases/download/raw_ndvi_modis/" ,date_list[[i]],".tif",sep=''),
-#                             destfile = file.path(temp_directory,paste("raw_ndvi_modis",date_list[[i]],".tif",sep = "")))
-# rast_i <- terra::rast(file.path(temp_directory,paste("raw_ndvi_modis",date_list[[i]],".tif",sep = "")))
-# ndvi_arr[,,i] <- rast_i[,,1]
-# print(date_list[[i]])
+# download the data
+In this part I will show the code for downloading the data from Dr. Wilson's github. I also uploaded the data in the release so this download code is commented out. Feel free to comment it in and use it if you want to download the data by yourself.
+
+```{r}
+#ndvi_path <- "the place where you save your NDVI data"
+#env_path <- "the place where you save your env data"
+
+#download the NDVI data from Dr.Wilson's github
+#for(i in 1:12){
+#  sample_data <- pb_download(paste(date_list[[i]],'.tif',sep = ''),
+#            repo = "AdamWilsonLab/emma_envdata",
+#            tag = "raw_ndvi_modis",
+#            dest = file.path(ndvi_path)
+#            )
 #}
 
-#print(paste("There are nan values in NDVI data: ",as.character(NaN %in% ndvi_arr,seq='')))
-#print(paste("There are infinitive values in NDVI data: ",as.character(Inf %in% ndvi_arr,seq='')))
+#download the env data
 
-#print(paste("The min value of NDVI data (without nan): ",min(ndvi_arr,na.rm = TRUE)))
-#print(paste("The max value of NDVI data (without nan): ",max(ndvi_arr,na.rm = TRUE)))
+#dem_data <- pb_download('nasadem.tif',
+#            repo = "AdamWilsonLab/emma_envdata",
+#            tag = "processed_static",
+#            dest = file.path(env_path)
+#            )
 
+#soil_data <- pb_download('soil_Total_N_.tif',
+#            repo = "AdamWilsonLab/emma_envdata",
+#            tag = "processed_static",
+#            dest = file.path(env_path)
+#            )
+
+#conc_data <- pb_download('MODCF_seasonality_concentration.tif',
+#            repo = "AdamWilsonLab/emma_envdata",
+#            tag = "processed_static",
+#            dest = file.path(env_path)
+#            )
+
+```
+
+
+
+```{r}
 NDVI_filelist = c()
 
 for(i in 1:12){
-  NDVI_filelist[i] = paste('/Users/mayue/Downloads/final_project-YueMa28/raw_ndvi_modis/',date_list[i],'.tif' ,sep="")
+  NDVI_filelist[i] = paste('https://github.com/geo511-2022/final_project-YueMa28/releases/download/NDVI/',date_list[i],'.tif' ,sep="")
 }
 
-temp_rasters <- terra::rast(NDVI_filelist)
-names(temp_rasters) <- c("Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec")
+ndvi_rasters <- terra::rast(NDVI_filelist)
+names(ndvi_rasters) <- c("Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec")
 
 
 ggplot() +
-  geom_spatraster(data=temp_rasters) +
+  geom_spatraster(data=ndvi_rasters) +
   facet_wrap(~lyr, ncol = 4) 
 
-
-
-/*
-ndvi_arr <- array(dim=c(1634,2035,12))
-
-
-
-for(i in 1:12){
-  sample_data <- pb_download(paste(date_list[[i]],'.tif',sep = ''),
-            repo = "AdamWilsonLab/emma_envdata",
-            tag = "raw_ndvi_modis",
-            #dest = tempdir(),
-            dest = file.path(ndvi_directory)
-            )
-  rast_i <- terra::rast(file.path(ndvi_directory,paste(date_list[[i]],".tif",sep = "")))
-  ndvi_arr[,,i] <- as.array(rast_i)
-  print(date_list[[i]])
-}
-*/
-print(paste("There are nan values in NDVI data: ",as.character(NaN %in% ndvi_arr,seq='')))
-print(paste("There are infinitive values in NDVI data: ",as.character(Inf %in% ndvi_arr,seq='')))
-
-print(paste("The min value of NDVI data (without nan): ",min(ndvi_arr,na.rm = TRUE)))
-print(paste("The max value of NDVI data (without nan): ",max(ndvi_arr,na.rm = TRUE)))
 ```
 ```{r}
-image(ndvi_arr[nrow(ndvi_arr):1,,1],asp=1)
+ndvi_rasters_norm <- (ndvi_rasters-100)/100
+
+ggplot() +
+  geom_spatraster(data=ndvi_rasters_test) +
+  facet_wrap(~lyr, ncol = 4) 
 
 ```
-After the replace step, I normalize the NDVI value to the value range [-1,1].
+
+
+
+
 ```{r}
-ndvi_arr_norm = (ndvi_arr-100)/100
-print(paste("The min value of normalized NDVI data (without nan): ",min(ndvi_arr_norm,na.rm = TRUE)))
-print(paste("The max value of normalized NDVI data (without nan): ",max(ndvi_arr_norm,na.rm = TRUE)))
+ndvi_arr_norm = as.array(ndvi_rasters_norm)
+
+print(paste("There are nan values in NDVI data: ",as.character(NaN %in% ndvi_arr_norm,seq='')))
+print(paste("There are infinitive values in NDVI data: ",as.character(Inf %in% ndvi_arr_norm,seq='')))
+
+print(paste("The min value of NDVI data (without nan): ",min(ndvi_arr_norm,na.rm = TRUE)))
+print(paste("The max value of NDVI data (without nan): ",max(ndvi_arr_norm,na.rm = TRUE)))
+
 ```
+
+
+```{r}
+image(ndvi_arr_norm[nrow(ndvi_arr_norm):1,,1],asp=1)
+
+```
+
 
 # collect the environmental data
 Here I download three static environmental data.
 ```{r}
-env_directory <- "/Users/mayue/Downloads/final_project-YueMa28/env_data"
+env_filelist = c()
 
-# get the environmental data
-env_arr <- array(dim=c(1634,2035,3))
+env_filelist[1] = "https://github.com/geo511-2022/final_project-YueMa28/releases/download/ENV/nasadem.tif"
+env_filelist[2] = "https://github.com/geo511-2022/final_project-YueMa28/releases/download/ENV/soil_Total_N_.tif"
+env_filelist[3] = "https://github.com/geo511-2022/final_project-YueMa28/releases/download/ENV/MODCF_seasonality_concentration.tif"
 
-dem_data <- pb_download('nasadem.tif',
-            repo = "AdamWilsonLab/emma_envdata",
-            tag = "processed_static",
-            #dest = tempdir(),
-            dest = file.path(env_directory)
-            )
-dem_arr <- terra::rast(file.path(env_directory,'nasadem.tif'))
-env_arr[,,1] <- as.array(dem_arr)
+env_rasters <- terra::rast(env_filelist)
+names(env_rasters) <- c("dem","soil","concentration")
+
+ggplot() +
+  geom_spatraster(data=env_rasters) +
+  facet_wrap(~lyr, ncol = 3) 
+
+```
+Here we normalized the env data.
+```{r}
+
+dem_rasters <- terra::rast(env_filelist[1])
+dem_min <- terra::minmax(dem_rasters)[1]
+dem_max <- terra::minmax(dem_rasters)[2]
+dem_rasters_norm <- (dem_rasters - dem_min + 1) / (dem_max - dem_min + 2)
 
 
-soil_data <- pb_download('soil_Total_N_.tif',
-            repo = "AdamWilsonLab/emma_envdata",
-            tag = "processed_static",
-            #dest = tempdir(),
-            dest = file.path(env_directory)
-            )
+soil_rasters <- terra::rast(env_filelist[2])
+soil_min <- terra::minmax(soil_rasters)[1]
+soil_max <- terra::minmax(soil_rasters)[2]
+soil_rasters_norm <- (soil_rasters - soil_min + 1) / (soil_max - soil_min + 2)
 
-soil_arr <- terra::rast(file.path(env_directory,'soil_Total_N_.tif'))
 
-env_arr[,,2] <- as.array(soil_arr)
+conc_rasters <- terra::rast(env_filelist[3])
+conc_min <- terra::minmax(conc_rasters)[1]
+conc_max <- terra::minmax(conc_rasters)[2]
+conc_rasters_norm <- (conc_rasters - conc_min + 1) / (conc_max - conc_min + 2)
 
-conc_data <- pb_download('MODCF_seasonality_concentration.tif',
-            repo = "AdamWilsonLab/emma_envdata",
-            tag = "processed_static",
-            #dest = tempdir(),
-            dest = file.path(env_directory)
-            )
 
-conc_arr <- terra::rast(file.path(env_directory,'MODCF_seasonality_concentration.tif'))
 
-env_arr[,,3] <- as.array(conc_arr)
 
+ggplot() +
+  geom_spatraster(data=env_rasters_norm) +
+  facet_wrap(~lyr, ncol = 3) 
+
+```
+
+```{r}
+env_arr = as.array(env_rasters)
 
 print(paste("There are nan values in static data: ",as.character(NaN %in% env_arr,seq='')))
 print(paste("There are infinitive values in static data: ",as.character(Inf %in% env_arr,seq='')))
