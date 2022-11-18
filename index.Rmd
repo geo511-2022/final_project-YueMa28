@@ -48,12 +48,8 @@ library(dst)
 library(reticulate)
 library(countcolors)
 library(tidyterra)
-knitr::opts_chunk$set(cache=TRUE)  # cache the results for quick compiling
 library(downloader)
-temp_directory <- '/Users/mayue/Downloads/'
-ndvi_directory <- '/Users/mayue/Downloads/final_project-YueMa28/raw_ndvi_modis'
-env_directory <- '/Users/mayue/Downloads/final_project-YueMa28/env_data'
-UBbox_directory <- "/Users/mayue/Box Sync/YueMa/Time series classification"
+
 
 ```
 
@@ -122,13 +118,11 @@ for(i in 1:12){
 }
 
 temp_rasters <- terra::rast(NDVI_filelist)
-names(temp_rasters) <- c(1:12)
-#temp_rasters_df <- as.data.frame(temp_rasters, xy = TRUE) 
-str(temp_rasters_df)
+names(temp_rasters) <- c("Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec")
 
 
 ggplot() +
-  geom_spatraster(data=temp_rasters,maxcell = 100) +
+  geom_spatraster(data=temp_rasters) +
   facet_wrap(~lyr, ncol = 4) 
 
 
@@ -170,6 +164,8 @@ print(paste("The max value of normalized NDVI data (without nan): ",max(ndvi_arr
 # collect the environmental data
 Here I download three static environmental data.
 ```{r}
+env_directory <- "/Users/mayue/Downloads/final_project-YueMa28/env_data"
+
 # get the environmental data
 env_arr <- array(dim=c(1634,2035,3))
 
