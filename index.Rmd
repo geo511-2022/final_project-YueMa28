@@ -132,7 +132,9 @@ In this part I will show the code for downloading the data from Dr. Wilson's git
 
 ```
 
+# Collect NDVI data
 
+This part collected NDVI data from January to December 2018 and visualize them.
 
 ```{r}
 NDVI_filelist = c()
@@ -150,6 +152,8 @@ ggplot() +
   facet_wrap(~lyr, ncol = 4) 
 
 ```
+This part normalizes the NDVI data from original value range ([80,200]) to new value range ([-1,1]).  
+
 ```{r}
 ndvi_rasters_norm <- (ndvi_rasters-100)/100
 
@@ -158,10 +162,7 @@ ggplot() +
   facet_wrap(~lyr, ncol = 4) 
 
 ```
-
-
-
-
+This part calculate the exact value range of this normalized NDVI data.
 ```{r}
 ndvi_arr_norm = as.array(ndvi_rasters_norm)
 
@@ -172,14 +173,12 @@ print(paste("The min value of NDVI data (without nan): ",min(ndvi_arr_norm,na.rm
 print(paste("The max value of NDVI data (without nan): ",max(ndvi_arr_norm,na.rm = TRUE)))
 
 ```
-
-
 ```{r}
 image(ndvi_arr_norm[nrow(ndvi_arr_norm):1,,1],asp=1)
 
 ```
 # collect the environmental data
-Here I download three static environmental data.
+The environmental data have been already downloaded and uploaded in the release. Here is the code for loading them.
 ```{r}
 env_filelist = c()
 
@@ -196,8 +195,18 @@ ggplot() +
 
 ```
 
+```{r}
+prec_arr_ori <- as.array(pr_rasters)
 
-Here we normalized the env data.
+print(paste("There are nan values in precipitation data: ",as.character(NaN %in% prec_arr_ori,seq='')))
+print(paste("There are infinitive values in precipitation data: ",as.character(Inf %in% prec_arr_ori,seq='')))
+
+print(paste("The min value of precipitation data (without nan): ",min(prec_arr_ori,na.rm = TRUE)))
+print(paste("The max value of precipitation data (without nan): ",max(prec_arr_ori,na.rm = TRUE)))
+```
+
+
+Here we normalized the environmental data and visualize them.
 ```{r}
 env_rasters_norm1 <- terra::rast()
 
@@ -226,19 +235,21 @@ ggplot() +
   facet_wrap(~lyr, ncol = 3) 
 
 ```
-
+Here we explore the detailed information about the environmental data.
 ```{r}
-env_arr = as.array(env_rasters_norm)
+env_arr_norm = as.array(env_rasters_norm)
 
-print(paste("There are nan values in static data: ",as.character(NaN %in% env_arr,seq='')))
-print(paste("There are infinitive values in static data: ",as.character(Inf %in% env_arr,seq='')))
+print(paste("There are nan values in static data: ",as.character(NaN %in% env_arr_norm,seq='')))
+print(paste("There are infinitive values in static data: ",as.character(Inf %in% env_arr_norm,seq='')))
 
-print(paste("The min value of static data (without nan): ",min(env_arr,na.rm = TRUE)))
-print(paste("The max value of static data (without nan): ",max(env_arr,na.rm = TRUE)))
+print(paste("The min value of static data (without nan): ",min(env_arr_norm,na.rm = TRUE)))
+print(paste("The max value of static data (without nan): ",max(env_arr_norm,na.rm = TRUE)))
 
 ```
 
+# load the dynamic data
 
+The precipitation (pr), radiation (rsds) and temperature (tas) data have been uploaded in the release part.
 
 ```{r}
 
@@ -260,6 +271,18 @@ ggplot() +
 ```
 
 ```{r}
+prec_arr_ori <- as.array(pr_rasters)
+
+print(paste("There are nan values in precipitation data: ",as.character(NaN %in% prec_arr_ori,seq='')))
+print(paste("There are infinitive values in precipitation data: ",as.character(Inf %in% prec_arr_ori,seq='')))
+
+print(paste("The min value of precipitation data (without nan): ",min(prec_arr_ori,na.rm = TRUE)))
+print(paste("The max value of precipitation data (without nan): ",max(prec_arr_ori,na.rm = TRUE)))
+
+```
+
+Here we normalize the precipitation data and visualize them.
+```{r}
 pr_rasters_norm1 <- terra::rast()
 
 for(i in 1:11){
@@ -278,23 +301,27 @@ current_raster_norm <- (current_raster - current_min + 1) / (current_max - curre
 pr_rasters_norm <- c(pr_rasters_norm1,current_raster_norm)
 names(pr_rasters_norm) <- c("Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec")
 
-
-
 ggplot() +
   geom_spatraster(data=pr_rasters_norm) +
   facet_wrap(~lyr, ncol = 4) 
 
 ```
 
-```{r}
-print(paste("There are nan values in precipitation data: ",as.character(NaN %in% prec_arr,seq='')))
-print(paste("There are infinitive values in precipitation data: ",as.character(Inf %in% prec_arr,seq='')))
 
-print(paste("The min value of precipitation data (without nan): ",min(prec_arr,na.rm = TRUE)))
-print(paste("The max value of precipitation data (without nan): ",max(prec_arr,na.rm = TRUE)))
+Here we explore more about the normalized precipitation data.
+```{r}
+prec_arr_norm <- as.array(pr_rasters_norm)
+
+print(paste("There are nan values in precipitation data: ",as.character(NaN %in% prec_arr_norm,seq='')))
+print(paste("There are infinitive values in precipitation data: ",as.character(Inf %in% prec_arr_norm,seq='')))
+
+print(paste("The min value of precipitation data (without nan): ",min(prec_arr_norm,na.rm = TRUE)))
+print(paste("The max value of precipitation data (without nan): ",max(prec_arr_norm,na.rm = TRUE)))
 
 ```
 
+
+Here we load the rsds data and visualize them.
 ```{r}
 
 rsds_filelist = c()
@@ -314,14 +341,14 @@ ggplot() +
 ```
 
 
-
+Here we explore the details of the original data.
 ```{r}
+rsds_arr_ori <- as.array(rsds_rasters)
+print(paste("There are nan values in downwelling shortwave flux data: ",as.character(NaN %in% rsds_arr_ori,seq='')))
+print(paste("There are infinitive values in downwelling shortwave flux data: ",as.character(Inf %in% rsds_arr_ori,seq='')))
 
-print(paste("There are nan values in downwelling shortwave flux data: ",as.character(NaN %in% rsds_arr,seq='')))
-print(paste("There are infinitive values in downwelling shortwave flux data: ",as.character(Inf %in% rsds_arr,seq='')))
-
-print(paste("The min value of downwelling shortwave flux data (without nan): ",min(rsds_arr,na.rm = TRUE)))
-print(paste("The max value of downwelling shortwave flux data (without nan): ",max(rsds_arr,na.rm = TRUE)))
+print(paste("The min value of downwelling shortwave flux data (without nan): ",min(rsds_arr_ori,na.rm = TRUE)))
+print(paste("The max value of downwelling shortwave flux data (without nan): ",max(rsds_arr_ori,na.rm = TRUE)))
 
 ```
 
@@ -349,13 +376,17 @@ names(rsds_rasters_norm) <- c("Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","S
 ggplot() +
   geom_spatraster(data=rsds_rasters_norm) +
   facet_wrap(~lyr, ncol = 4) 
+```
 
 
 
+```{r}
+rsds_arr_norm <- as.array(rsds_rasters_norm)
+print(paste("There are nan values in downwelling shortwave flux data: ",as.character(NaN %in% rsds_arr_norm,seq='')))
+print(paste("There are infinitive values in downwelling shortwave flux data: ",as.character(Inf %in% rsds_arr_norm,seq='')))
 
-
-print(paste("The min value of normalized downwelling shortwave flux data (without nan): ",min(norm_rsds,na.rm = TRUE)))
-print(paste("The max value of normalized downwelling shortwave flux data (without nan): ",max(norm_rsds,na.rm = TRUE)))
+print(paste("The min value of downwelling shortwave flux data (without nan): ",min(rsds_arr_norm,na.rm = TRUE)))
+print(paste("The max value of downwelling shortwave flux data (without nan): ",max(rsds_arr_norm,na.rm = TRUE)))
 
 ```
 
@@ -379,11 +410,12 @@ ggplot() +
 
 
 ```{r}
-print(paste("There are nan values in mean daily airtemperature data: ",as.character(NaN %in% tas_arr,seq='')))
-print(paste("There are infinitive values in mean daily air temperature data: ",as.character(Inf %in% tas_arr,seq='')))
+tas_arr_ori <- as.array(tas_rasters)
+print(paste("There are nan values in mean daily airtemperature data: ",as.character(NaN %in% tas_arr_ori,seq='')))
+print(paste("There are infinitive values in mean daily air temperature data: ",as.character(Inf %in% tas_arr_ori,seq='')))
 
-print(paste("The min value of mean daily air temperature data (without nan): ",min(tas_arr,na.rm = TRUE)))
-print(paste("The max value of mean daily air temperature data (without nan): ",max(tas_arr,na.rm = TRUE)))
+print(paste("The min value of mean daily air temperature data (without nan): ",min(tas_arr_ori,na.rm = TRUE)))
+print(paste("The max value of mean daily air temperature data (without nan): ",max(tas_arr_ori,na.rm = TRUE)))
 
 
 ```
@@ -412,10 +444,17 @@ names(tas_rasters_norm) <- c("Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Se
 ggplot() +
   geom_spatraster(data=tas_rasters_norm) +
   facet_wrap(~lyr, ncol = 4) 
+```
 
 
-print(paste("The min value of normalized mean daily air temperature data (without nan): ",min(norm_tas,na.rm = TRUE)))
-print(paste("The max value of normalized mean daily air temperature data (without nan): ",max(norm_tas,na.rm = TRUE)))
+
+```{r}
+tas_arr_norm <- as.array(tas_rasters_norm)
+print(paste("There are nan values in mean daily airtemperature data: ",as.character(NaN %in% tas_arr_norm,seq='')))
+print(paste("There are infinitive values in mean daily air temperature data: ",as.character(Inf %in% tas_arr_norm,seq='')))
+
+print(paste("The min value of mean daily air temperature data (without nan): ",min(tas_arr_norm,na.rm = TRUE)))
+print(paste("The max value of mean daily air temperature data (without nan): ",max(tas_arr_norm,na.rm = TRUE)))
 ```
 
 
