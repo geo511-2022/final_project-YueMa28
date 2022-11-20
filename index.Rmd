@@ -262,10 +262,7 @@ for(i in month){
 
 pr_rasters <- terra::rast(pr_filelist)
 names(pr_rasters) <- c("Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec")
-
-pr_rasters_res <- terra::rast(nrows=1634, ncols=2035, nlyrs=12,xmin=16.54986, xmax=27.51653, ymin=-34.83347, ymax=-28.03347)
-
-pr_rasters<- resample(pr_rasters, pr_rasters_res, method="bilinear")
+pr_rasters=terra::project(pr_rasters,ndvi_rasters_norm)
 
 ggplot() +
   geom_spatraster(data=pr_rasters) +
@@ -293,8 +290,7 @@ for(i in 1:11){
   current_min <- terra::minmax(current_raster)[1]
   current_max <- terra::minmax(current_raster)[2]
   current_raster_norm <- (current_raster - current_min + 1) / (current_max - current_min + 2)
-  current_rasters_res <- terra::rast(nrows=1634, ncols=2035, nlyrs=12,xmin=16.54986, xmax=27.51653, ymin=-34.83347, ymax=-28.03347)
-  current_raster_norm<- resample(current_raster_norm, current_rasters_res, method="bilinear")
+  current_raster_norm = terra::project(current_raster_norm,ndvi_rasters_norm)
   pr_rasters_norm1 <- c(pr_rasters_norm1,current_raster_norm)
 }
 
@@ -302,8 +298,7 @@ current_raster <- terra::rast(pr_filelist[12])
 current_min <- terra::minmax(current_raster)[1]
 current_max <- terra::minmax(current_raster)[2]
 current_raster_norm <- (current_raster - current_min + 1) / (current_max - current_min + 2)
-current_rasters_res <- terra::rast(nrows=1634, ncols=2035, nlyrs=12,xmin=16.54986, xmax=27.51653, ymin=-34.83347, ymax=-28.03347)
-current_raster_norm<- resample(current_raster_norm, current_rasters_res, method="bilinear")
+current_raster_norm = terra::project(current_raster_norm,ndvi_rasters_norm)
 
 pr_rasters_norm <- c(pr_rasters_norm1,current_raster_norm)
 names(pr_rasters_norm) <- c("Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec")
@@ -339,9 +334,7 @@ for(i in month){
 
 rsds_rasters <- terra::rast(rsds_filelist)
 names(rsds_rasters) <- c("Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec")
-rsds_rasters_res <- terra::rast(nrows=1634, ncols=2035, nlyrs=12,xmin=16.54986, xmax=27.51653, ymin=-34.83347, ymax=-28.03347)
-
-rsds_rasters<- resample(rsds_rasters, rsds_rasters_res, method="bilinear")
+rsds_rasters = terra::project(rsds_rasters,ndvi_rasters_norm)
 
 ggplot() +
   geom_spatraster(data=rsds_rasters) +
@@ -368,8 +361,7 @@ for(i in 1:11){
   current_min <- terra::minmax(current_raster)[1]
   current_max <- terra::minmax(current_raster)[2]
   current_raster_norm <- (current_raster - current_min + 1) / (current_max - current_min + 2)
-  current_rasters_res <- terra::rast(nrows=1634, ncols=2035, nlyrs=12,xmin=16.54986, xmax=27.51653, ymin=-34.83347, ymax=-28.03347)
-  current_raster_norm<- resample(current_raster_norm, current_rasters_res, method="bilinear")
+  current_raster_norm = terra::project(current_raster_norm,ndvi_rasters_norm)
   rsds_rasters_norm1 <- c(rsds_rasters_norm1,current_raster_norm)
 }
 
@@ -377,9 +369,7 @@ current_raster <- terra::rast(rsds_filelist[12])
 current_min <- terra::minmax(current_raster)[1]
 current_max <- terra::minmax(current_raster)[2]
 current_raster_norm <- (current_raster - current_min + 1) / (current_max - current_min + 2)
-current_rasters_res <- terra::rast(nrows=1634, ncols=2035, nlyrs=12,xmin=16.54986, xmax=27.51653, ymin=-34.83347, ymax=-28.03347)
-current_raster_norm<- resample(current_raster_norm, current_rasters_res, method="bilinear")
-
+current_raster_norm = terra::project(current_raster_norm,ndvi_rasters_norm)
 rsds_rasters_norm <- c(rsds_rasters_norm1,current_raster_norm)
 names(rsds_rasters_norm) <- c("Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec")
 
@@ -411,9 +401,7 @@ for(i in month){
 tas_rasters <- terra::rast(tas_filelist)
 names(tas_rasters) <- c("Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec")
 
-tas_rasters_res <- terra::rast(nrows=1634, ncols=2035, nlyrs=12,xmin=16.54986, xmax=27.51653, ymin=-34.83347, ymax=-28.03347)
-
-tas_rasters<- resample(tas_rasters, tas_rasters_res, method="bilinear")
+tas_rasters = terra::project(tas_rasters,ndvi_rasters_norm)
 ggplot() +
   geom_spatraster(data=tas_rasters) +
   facet_wrap(~lyr, ncol = 4) 
@@ -439,8 +427,7 @@ for(i in 1:11){
   current_min <- terra::minmax(current_raster)[1]
   current_max <- terra::minmax(current_raster)[2]
   current_raster_norm <- (current_raster - current_min + 1) / (current_max - current_min + 2)
-  current_rasters_res <- terra::rast(nrows=1634, ncols=2035, nlyrs=12,xmin=16.54986, xmax=27.51653, ymin=-34.83347, ymax=-28.03347)
-  current_raster_norm<- resample(current_raster_norm, current_rasters_res, method="bilinear")
+  current_raster_norm = terra::project(current_raster_norm,ndvi_rasters_norm)
   tas_rasters_norm1 <- c(tas_rasters_norm1,current_raster_norm)
 }
 
@@ -448,8 +435,7 @@ current_raster <- terra::rast(tas_filelist[12])
 current_min <- terra::minmax(current_raster)[1]
 current_max <- terra::minmax(current_raster)[2]
 current_raster_norm <- (current_raster - current_min + 1) / (current_max - current_min + 2)
-current_rasters_res <- terra::rast(nrows=1634, ncols=2035, nlyrs=12,xmin=16.54986, xmax=27.51653, ymin=-34.83347, ymax=-28.03347)
-current_raster_norm<- resample(current_raster_norm, current_rasters_res, method="bilinear")
+current_raster_norm = terra::project(current_raster_norm,ndvi_rasters_norm)
 tas_rasters_norm <- c(tas_rasters_norm1,current_raster_norm)
 names(tas_rasters_norm) <- c("Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec")
 
@@ -471,7 +457,21 @@ print(paste("The max value of mean daily air temperature data (without nan): ",m
 
 
 ```{r}
+
+#pr_rasters_norm=terra::project(pr_rasters_norm,ndvi_rasters_norm)
+
 all_variables_raster <- c(ndvi_rasters_norm,env_rasters_norm,pr_rasters_norm,rsds_rasters_norm,tas_rasters_norm)
+
+```
+This part generate the label of the training dataset.
+```{r}
+land_cover_type <- terra::rast("/Users/mayue/Box Sync/YueMa/clipped_1990_2020.tif")
+land_cover_type
+
+land_cover_type=terra::project(land_cover_type,ndvi_rasters_norm)
+
+terra::minmax(land_cover_type)
+# this part 
 
 ```
 
