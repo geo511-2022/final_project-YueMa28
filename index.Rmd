@@ -154,7 +154,7 @@ ggplot() +
 ndvi_rasters_norm <- (ndvi_rasters-100)/100
 
 ggplot() +
-  geom_spatraster(data=ndvi_rasters_test) +
+  geom_spatraster(data=ndvi_rasters_norm) +
   facet_wrap(~lyr, ncol = 4) 
 
 ```
@@ -178,8 +178,6 @@ print(paste("The max value of NDVI data (without nan): ",max(ndvi_arr_norm,na.rm
 image(ndvi_arr_norm[nrow(ndvi_arr_norm):1,,1],asp=1)
 
 ```
-
-
 # collect the environmental data
 Here I download three static environmental data.
 ```{r}
@@ -197,6 +195,8 @@ ggplot() +
   facet_wrap(~lyr, ncol = 3) 
 
 ```
+
+
 Here we normalized the env data.
 ```{r}
 env_rasters_norm1 <- terra::rast()
@@ -205,20 +205,20 @@ dem_rasters <- terra::rast(env_filelist[1])
 dem_min <- terra::minmax(dem_rasters)[1]
 dem_max <- terra::minmax(dem_rasters)[2]
 dem_rasters_norm <- (dem_rasters - dem_min + 1) / (dem_max - dem_min + 2)
-env_rasters_norm2 <- c(env_rasters_norm1,dem_rasters_norm)
+
 
 soil_rasters <- terra::rast(env_filelist[2])
 soil_min <- terra::minmax(soil_rasters)[1]
 soil_max <- terra::minmax(soil_rasters)[2]
 soil_rasters_norm <- (soil_rasters - soil_min + 1) / (soil_max - soil_min + 2)
-env_rasters_norm3 <- c(env_rasters_norm2,soil_rasters_norm)
+
 
 conc_rasters <- terra::rast(env_filelist[3])
 conc_min <- terra::minmax(conc_rasters)[1]
 conc_max <- terra::minmax(conc_rasters)[2]
 conc_rasters_norm <- (conc_rasters - conc_min + 1) / (conc_max - conc_min + 2)
 
-env_rasters_norm <- c(env_rasters_norm3,conc_rasters_norm)
+env_rasters_norm <- c(dem_rasters_norm,soil_rasters_norm,conc_rasters_norm)
 names(env_rasters_norm) <- c("dem","soil","concentration")
 
 ggplot() +
@@ -241,47 +241,52 @@ print(paste("The max value of static data (without nan): ",max(env_arr,na.rm = T
 
 
 ```{r}
-#month <- c("01","02","03","04","05","06","07","08","09","10","11","12")
 
-#prec_arr <- array(dim=c(1634,2035,120))
-#current_time = 1
-
-#for(y in 2009:2018){
-#  for(m in month){
-#    current_pr = terra::rast(file.path(UBbox_directory,paste("clipped_env/pr/pr_",m,"_",as.character(y),".tif",sep = "")))
-#    resam = terra::rast(nrows=1634, ncols=2035,nlyrs=1)
-#    pr_res = resample(current_pr,resam,method='bilinear')
-#    prec_arr[,,current_time] = pr_res[,,1]
-#    current_time = current_time + 1
-#  }
-#}
-
-#print(paste("There are nan values in precipitation data: ",as.character(NaN %in% prec_arr,seq='')))
-#print(paste("There are infinitive values in precipitation data: ",as.character(Inf %in% prec_arr,seq='')))
-
-#print(paste("The min value of precipitation data (without nan): ",min(prec_arr,na.rm = TRUE)))
-#print(paste("The max value of precipitation data (without nan): ",max(prec_arr,na.rm = TRUE)))
-
-
-
-
+pr_filelist = c()
 month <- c("01","02","03","04","05","06","07","08","09","10","11","12")
 
-prec_arr <- array(dim=c(1634,2035,12))
-
-current_time = 1
-
-for(m in month){
-  current_pr = terra::rast(file.path(UBbox_directory,paste("clipped_env/pr/pr_",m,"_2018.tif",sep = "")))
-  resam = terra::rast(nrows=1634, ncols=2035,nlyrs=1)
-  pr_res = terra::resample(current_pr,resam,method='bilinear')
-  prec_arr[,,current_time] = as.array(pr_res)
-  current_time = current_time + 1
+for(i in month){
+  pr_filelist[i] = paste('https://github.com/geo511-2022/final_project-YueMa28/releases/download/dynamic_pr/pr_',i,'_2018.tif' ,sep="")
 }
 
+pr_rasters <- terra::rast(pr_filelist)
+names(pr_rasters) <- c("Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec")
+
+
+ggplot() +
+  geom_spatraster(data=pr_rasters) +
+  facet_wrap(~lyr, ncol = 4) 
+
+```
+
+```{r}
+pr_rasters_norm1 <- terra::rast()
+
+for(i in 1:11){
+  current_raster <- terra::rast(pr_filelist[i])
+  current_min <- terra::minmax(current_raster)[1]
+  current_max <- terra::minmax(current_raster)[2]
+  current_raster_norm <- (current_raster - current_min + 1) / (current_max - current_min + 2)
+  pr_rasters_norm1 <- c(pr_rasters_norm1,current_raster_norm)
+}
+
+current_raster <- terra::rast(pr_filelist[12])
+current_min <- terra::minmax(current_raster)[1]
+current_max <- terra::minmax(current_raster)[2]
+current_raster_norm <- (current_raster - current_min + 1) / (current_max - current_min + 2)
+
+pr_rasters_norm <- c(pr_rasters_norm1,current_raster_norm)
+names(pr_rasters_norm) <- c("Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec")
 
 
 
+ggplot() +
+  geom_spatraster(data=pr_rasters_norm) +
+  facet_wrap(~lyr, ncol = 4) 
+
+```
+
+```{r}
 print(paste("There are nan values in precipitation data: ",as.character(NaN %in% prec_arr,seq='')))
 print(paste("There are infinitive values in precipitation data: ",as.character(Inf %in% prec_arr,seq='')))
 
@@ -291,59 +296,26 @@ print(paste("The max value of precipitation data (without nan): ",max(prec_arr,n
 ```
 
 ```{r}
-#norm_pr <- array(dim=c(1634,2035,120))
 
-#for(i in 1:120){
-#  norm_pr[,,i] = MaxMinNormalization(prec_arr[,,i],min(prec_arr[,,i],na.rm = TRUE)-1,max(prec_arr[,,i],na.rm = TRUE)+1)
-#}
+rsds_filelist = c()
+month <- c("01","02","03","04","05","06","07","08","09","10","11","12")
 
-#print(paste("The min value of normalized precipitation data (without nan): ",min(norm_pr,na.rm = TRUE)))
-#print(paste("The max value of normalized precipitation data (without nan): ",max(norm_pr,na.rm = TRUE)))
-
-
-norm_pr <- array(dim=c(1634,2035,12))
-
-for(i in 1:12){
-  norm_pr[,,i] = MaxMinNormalization(prec_arr[,,i],min(prec_arr[,,i],na.rm = TRUE)-1,max(prec_arr[,,i],na.rm = TRUE)+1)
+for(i in month){
+  rsds_filelist[i] = paste('https://github.com/geo511-2022/final_project-YueMa28/releases/download/dynamic_rsds/rsds_',i,'_2018.tif' ,sep="")
 }
 
-print(paste("The min value of normalized precipitation data (without nan): ",min(norm_pr,na.rm = TRUE)))
-print(paste("The max value of normalized precipitation data (without nan): ",max(norm_pr,na.rm = TRUE)))
+rsds_rasters <- terra::rast(rsds_filelist)
+names(rsds_rasters) <- c("Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec")
 
+
+ggplot() +
+  geom_spatraster(data=rsds_rasters) +
+  facet_wrap(~lyr, ncol = 4) 
 ```
+
+
+
 ```{r}
-#rsds_arr <- array(dim=c(1634,2035,120))
-#current_time_rsds = 1
-
-#for(y in 2009:2018){
-#  for(m in month){
-#    current_rsds = terra::rast(file.path(UBbox_directory,paste("clipped_env/rsds/rsds_",m,"_",as.character(y),".tif",sep = "")))
-#   resam = terra::rast(nrows=1634, ncols=2035,nlyrs=1)
-#    rsds_res = resample(current_rsds,resam,method='bilinear')
-#    rsds_arr[,,current_time_rsds] = rsds_res[,,1]
-#    current_time_rsds = current_time_rsds + 1
-#  }
-#}
-
-#print(paste("There are nan values in downwelling shortwave flux data: ",as.character(NaN %in% rsds_arr,seq='')))
-#print(paste("There are infinitive values in downwelling shortwave flux data: ",as.character(Inf %in% rsds_arr,seq='')))
-
-#print(paste("The min value of downwelling shortwave flux data (without nan): ",min(rsds_arr,na.rm = TRUE)))
-#print(paste("The max value of downwelling shortwave flux data (without nan): ",max(rsds_arr,na.rm = TRUE)))
-
-
-
-
-rsds_arr <- array(dim=c(1634,2035,12))
-current_time_rsds = 1
-
-  for(m in month){
-    current_rsds = terra::rast(file.path(UBbox_directory,paste("clipped_env/rsds/rsds_",m,"_2018.tif",sep = "")))
-    resam = terra::rast(nrows=1634, ncols=2035,nlyrs=1)
-    rsds_res = terra::resample(current_rsds,resam,method='bilinear')
-    rsds_arr[,,current_time_rsds] = as.array(rsds_res)
-    current_time_rsds = current_time_rsds + 1
-}
 
 print(paste("There are nan values in downwelling shortwave flux data: ",as.character(NaN %in% rsds_arr,seq='')))
 print(paste("There are infinitive values in downwelling shortwave flux data: ",as.character(Inf %in% rsds_arr,seq='')))
@@ -354,23 +326,32 @@ print(paste("The max value of downwelling shortwave flux data (without nan): ",m
 ```
 
 ```{r}
-#norm_rsds <- array(dim=c(1634,2035,120))
+rsds_rasters_norm1 <- terra::rast()
 
-#for(i in 1:120){
-#  norm_rsds[,,i] = MaxMinNormalization(rsds_arr[,,i],min(rsds_arr[,,i],na.rm = TRUE)-1,max(rsds_arr[,,i],na.rm = TRUE)+1)
-#}
-
-
-#print(paste("The min value of downwelling shortwave flux data (without nan): ",min(norm_rsds,na.rm = TRUE)))
-#print(paste("The max value of downwelling shortwave flux data (without nan): ",max(norm_rsds,na.rm = TRUE)))
-
-
-
-norm_rsds <- array(dim=c(1634,2035,12))
-
-for(i in 1:12){
-  norm_rsds[,,i] = MaxMinNormalization(rsds_arr[,,i],min(rsds_arr[,,i],na.rm = TRUE)-1,max(rsds_arr[,,i],na.rm = TRUE)+1)
+for(i in 1:11){
+  current_raster <- terra::rast(rsds_filelist[i])
+  current_min <- terra::minmax(current_raster)[1]
+  current_max <- terra::minmax(current_raster)[2]
+  current_raster_norm <- (current_raster - current_min + 1) / (current_max - current_min + 2)
+  rsds_rasters_norm1 <- c(rsds_rasters_norm1,current_raster_norm)
 }
+
+current_raster <- terra::rast(rsds_filelist[12])
+current_min <- terra::minmax(current_raster)[1]
+current_max <- terra::minmax(current_raster)[2]
+current_raster_norm <- (current_raster - current_min + 1) / (current_max - current_min + 2)
+
+rsds_rasters_norm <- c(rsds_rasters_norm1,current_raster_norm)
+names(rsds_rasters_norm) <- c("Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec")
+
+
+
+ggplot() +
+  geom_spatraster(data=rsds_rasters_norm) +
+  facet_wrap(~lyr, ncol = 4) 
+
+
+
 
 
 print(paste("The min value of normalized downwelling shortwave flux data (without nan): ",min(norm_rsds,na.rm = TRUE)))
@@ -379,107 +360,79 @@ print(paste("The max value of normalized downwelling shortwave flux data (withou
 ```
 
 ```{r}
+tas_filelist = c()
+month <- c("01","02","03","04","05","06","07","08","09","10","11","12")
 
-#tas_arr <- array(dim=c(1634,2035,120))
-#current_time_tas = 1
-
-#for(y in 2009:2018){
-#  for(m in month){
-#    current_tas = terra::rast(file.path(temp_directory,paste("clipped_env/tas/tas_",m,"_",as.character(y),".tif",sep = "")))
-#    resam = terra::rast(nrows=1634, ncols=2035,nlyrs=1)
-#    tas_res = resample(current_tas,resam,method='bilinear')
-#    tas_arr[,,current_time_tas] = tas_res[,,1]
-#    current_time_tas = current_time_tas + 1
-#  }
-#}
-
-
-
-tas_arr <- array(dim=c(1634,2035,12))
-current_time_tas = 1
-
-
-for(m in month){
-  current_tas = terra::rast(file.path(UBbox_directory,paste("clipped_env/tas/tas_",m,"_2018.tif",sep = "")))
-  resam = terra::rast(nrows=1634, ncols=2035,nlyrs=1)
-  tas_res = terra::resample(current_tas,resam,method='bilinear')
-  tas_arr[,,current_time_tas] = as.array(tas_res)
-  current_time_tas = current_time_tas + 1
+for(i in month){
+  tas_filelist[i] = paste('https://github.com/geo511-2022/final_project-YueMa28/releases/download/dynamic_tas/tas_',i,'_2018.tif' ,sep="")
 }
 
-print(paste("There are nan values in mean daily airtemperature data: ",as.character(NaN %in% rsds_arr,seq='')))
-print(paste("There are infinitive values in mean daily air temperature data: ",as.character(Inf %in% rsds_arr,seq='')))
+tas_rasters <- terra::rast(tas_filelist)
+names(tas_rasters) <- c("Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec")
 
-print(paste("The min value of mean daily air temperature data (without nan): ",min(rsds_arr,na.rm = TRUE)))
-print(paste("The max value of mean daily air temperature data (without nan): ",max(rsds_arr,na.rm = TRUE)))
+
+ggplot() +
+  geom_spatraster(data=tas_rasters) +
+  facet_wrap(~lyr, ncol = 4) 
+
+```
+
+
+```{r}
+print(paste("There are nan values in mean daily airtemperature data: ",as.character(NaN %in% tas_arr,seq='')))
+print(paste("There are infinitive values in mean daily air temperature data: ",as.character(Inf %in% tas_arr,seq='')))
+
+print(paste("The min value of mean daily air temperature data (without nan): ",min(tas_arr,na.rm = TRUE)))
+print(paste("The max value of mean daily air temperature data (without nan): ",max(tas_arr,na.rm = TRUE)))
 
 
 ```
 
 ```{r}
-#norm_tas <- array(dim=c(1634,2035,120))
+tas_rasters_norm1 <- terra::rast()
 
-#for(i in 1:120){
-#  norm_tas[,,i] = MaxMinNormalization(tas_arr[,,i],min(tas_arr[,,i],na.rm = TRUE)-1,max(tas_arr[,,i],na.rm = TRUE)+1)
-#}
-
-#print(paste("The min value of normalized mean daily air temperature data (without nan): ",min(norm_rsds,na.rm = TRUE)))
-#print(paste("The max value of normalized mean daily air temperature data (without nan): ",max(norm_rsds,na.rm = TRUE)))
-
-
-norm_tas <- array(dim=c(1634,2035,12))
-
-for(i in 1:12){
-  norm_tas[,,i] = MaxMinNormalization(tas_arr[,,i],min(tas_arr[,,i],na.rm = TRUE)-1,max(tas_arr[,,i],na.rm = TRUE)+1)
+for(i in 1:11){
+  current_raster <- terra::rast(tas_filelist[i])
+  current_min <- terra::minmax(current_raster)[1]
+  current_max <- terra::minmax(current_raster)[2]
+  current_raster_norm <- (current_raster - current_min + 1) / (current_max - current_min + 2)
+  tas_rasters_norm1 <- c(tas_rasters_norm1,current_raster_norm)
 }
 
-print(paste("The min value of normalized mean daily air temperature data (without nan): ",min(norm_rsds,na.rm = TRUE)))
-print(paste("The max value of normalized mean daily air temperature data (without nan): ",max(norm_rsds,na.rm = TRUE)))
+current_raster <- terra::rast(tas_filelist[12])
+current_min <- terra::minmax(current_raster)[1]
+current_max <- terra::minmax(current_raster)[2]
+current_raster_norm <- (current_raster - current_min + 1) / (current_max - current_min + 2)
+
+tas_rasters_norm <- c(tas_rasters_norm1,current_raster_norm)
+names(tas_rasters_norm) <- c("Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec")
+
+
+
+ggplot() +
+  geom_spatraster(data=tas_rasters_norm) +
+  facet_wrap(~lyr, ncol = 4) 
+
+
+print(paste("The min value of normalized mean daily air temperature data (without nan): ",min(norm_tas,na.rm = TRUE)))
+print(paste("The max value of normalized mean daily air temperature data (without nan): ",max(norm_tas,na.rm = TRUE)))
 ```
 
 
 ```{r}
-#all_variables <- array(dim=c(1634,2035,120,7))
-
-#for(i in 1:120){
-#  all_variables[,,i,1] = ndvi_arr_norm[,,i]
-#  all_variables[,,i,2] = env_arr[,,1]
-#  all_variables[,,i,3] = env_arr[,,2]
-#  all_variables[,,i,4] = env_arr[,,3]
-#  all_variables[,,i,5] = norm_pr[,,i]
-#  all_variables[,,i,6] = norm_rsds[,,i]
-#  all_variables[,,i,7] = norm_tas[,,i]
-#}
-
-
-all_variables <- array(dim=c(1634,2035,12,7))
-
-for(i in 1:12){
-  for(m in 1:1634){
-    for(n in 1:2035){
-        all_variables[m,n,i,1] = ndvi_arr_norm[m,n,i]
-        all_variables[m,n,i,2] = env_arr[m,n,1]
-        all_variables[m,n,i,3] = env_arr[m,n,2]
-        all_variables[m,n,i,4] = env_arr[m,n,3]
-        all_variables[m,n,i,5] = norm_pr[m,n,i]
-        all_variables[m,n,i,6] = norm_rsds[m,n,i]
-        all_variables[m,n,i,7] = norm_tas[m,n,i]
-    }
-  }
-
-}
+all_variables_raster <- c(ndvi_rasters_norm,env_rasters_norm,pr_rasters_norm,rsds_rasters_norm,tas_rasters_norm)
 
 ```
 
 ```{r}
+all_variables_arr <- as.array(all_variables_raster)
+
 all_variables_mask <- array(dim=c(1634,2035))
-
-
 
 for(m in 1:1634){
   for(n in 1:2035){
     #found_nan = FALSE
-    if(NaN %in% all_variables[m,n,,]){
+    if(NaN %in% all_variables_arr[m,n,,]){
       found_nan = TRUE
       
     }
@@ -495,61 +448,9 @@ for(m in 1:1634){
     }
   }
 }
-count
-NaN %in% all_variables[1634,2035,,]
-all_variables_mask[11,12]
-1 %in% all_variables_mask
-```
-
-```{r}
-class_arr <- array(dim=c(1634,2035,10))
-
-year = c("09","10","11","12","13","14","15","16","17","18")
-
-for(y in 1:10){
-  current_class = terra::rast(file.path(temp_directory,paste("africa_classification_CFR/",year[[y]],"_CFR.tif",sep = "")))
-  class_arr[,,y] = current_class[,,1]
-}
-
-class_mask <- array(dim = c(1634,2035))
-
-for(m in 1:1634){
-  for(n in 1:2035){
-    found_change = FALSE
-    for(t in 1:10){
-      if(class_arr[m,n,1] != class_arr[m,n,t] || class_arr[m,n,1] == 0 ){
-        found_change = TRUE
-        break
-      }
-    }
-    if(found_change){
-      class_mask[m,n] = -1
-    }
-    else{
-      class_mask[m,n] = 1
-    }
-  }
-}
-
 
 ```
 
-```{r}
-combine_mask = array(dim = c(1634,2035))
-
-for(m in 1:1634){
-  for(n in 1:2035){
-    if(all_variables_mask[m,n] == 1 && class_mask[m,n] == 1){
-      combine_mask[m,n] = 1
-    }
-    else{
-      combine_mask[m,n] = -1
-    }
-  }
-}
-
-
-```
 
 ```{r}
 for(m in 1:1634){
@@ -710,20 +611,10 @@ Tables and figures (maps and other graphics) are carefully planned to convey the
 
 Show tables, plots, etc. and describe them.
 
-```{r, fig.width=6, fig.height=3, fig.cap="Map of completely random data"}
-m <- leaflet(data) %>% 
-  addTiles() %>% 
-  addCircleMarkers(~x, ~y, radius = ~size,color = ~as.factor(category)) %>% 
-  addPopups(~x[2], ~y[2], "Random popup")
-m  # a map with the default OSM tile layer
-```
 
 
-```{r}
-data %>% 
-  ggplot(aes(x=x,y=y,col=category))+
-  geom_point()
-```
+
+
 
 # Conclusions
 
