@@ -465,41 +465,80 @@ all_variables_raster <- c(ndvi_rasters_norm,env_rasters_norm,pr_rasters_norm,rsd
 ```
 This part generate the label of the training dataset.
 ```{r}
-land_cover_type <- terra::rast("/Users/mayue/Box Sync/YueMa/clipped_1990_2020.tif")
-land_cover_type
+land_cover_type <- terra::rast("https://github.com/geo511-2022/final_project-YueMa28/releases/download/landcover_type/clipped_1990_2020.tif")
 
 land_cover_type=terra::project(land_cover_type,ndvi_rasters_norm)
 
-terra::minmax(land_cover_type)
-# this part 
-
+land_cover_arr <- as.array(land_cover_type)
 ```
-
 ```{r}
-all_variables_arr <- as.array(all_variables_raster)
+binary_mask <- array(dim=c(1634,2035))
 
-all_variables_mask <- array(dim=c(1634,2035))
-
-for(m in 1:1634){
-  for(n in 1:2035){
-    #found_nan = FALSE
-    if(NaN %in% all_variables_arr[m,n,,]){
-      found_nan = TRUE
-      
+for(i in 1:1634){
+  for(j in 1:2035){
+    if(is.nan(land_cover_arr[i,j,1])){
+      binary_mask[i,j] = NaN
+    }
+    else if(land_cover_arr[i,j,1] == 105){
+      binary_mask[i,j] = 1
     }
     else{
-      found_nan = FALSE
-    }
-    
-    if(found_nan){
-      all_variables_mask[m,n] <- -1
-    }
-    else{
-      all_variables_mask[m,n] <- 1
+      binary_mask[i,j] = 0
     }
   }
 }
 
+image(binary_mask,asp=1)
+
+```
+```{r}
+test_105 <- terra::rast("/Users/mayue/Box Sync/YueMa/setnull_105.tif")
+test_105_arr <- as.array(test_105)
+image(test_105_arr,asp=1)
+```
+
+```{r}
+#all_variables_arr <- array(dim=c(1634,2035,12,7))
+
+all_variables_mask <- array(dim=c(1634,2035))
+
+
+for(i in 1:1634){
+  for(j in 1:2035){
+    for(k in 1:12){
+      if(is.nan(ndvi_arr_norm[i,j,k])){
+        all_variables_mask[i,j] = -1
+        break
+      }
+      else if(is.nan(prec_arr_norm[i,j,k])){
+        all_variables_mask[i,j] = -1
+        break
+      }
+      else if(is.nan(rsds_arr_norm[i,j,k])){
+        all_variables_mask[i,j] = -1
+        break
+      }
+      else if(is.nan(tas_arr_norm[i,j,k])){
+        all_variables_mask[i,j] = -1
+        break
+      }
+      else{
+        all_variables_mask[i,j] = 1
+      }
+    for(h in 1:3){
+      if(is.nan(env_arr_norm[i,j,h])){
+        all_variables_mask[i,j] = -1
+        break
+      }
+      else{
+        all_variables_mask[i,j] = 1
+      }
+    }
+    }
+  }
+}
+
+image(all_variables_mask,asp=1)
 ```
 
 
