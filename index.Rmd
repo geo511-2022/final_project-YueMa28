@@ -4,7 +4,7 @@ author: Yue Ma
 subtitle: Using time series data to train deep learning models for classification
 ---
 
-# Introduction
+# Introduction #I like the layout of your code. logically, it is easy to follow. 
 
 Time series data is of tremendous importance in the field of environmental sustainability. Exploring this kind of data helps us understand the pattern of ecosystems, which allows us to detect the abnormal changes in time and help the relative department to make decisions. In this study, I will compare the performances of two state-of-the-art time series classification (TSC) models, fully convectional neural network (FCN) and deep Residual Network (ResNet).
 
