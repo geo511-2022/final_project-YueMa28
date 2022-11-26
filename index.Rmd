@@ -472,6 +472,9 @@ land_cover_type <- terra::rast("https://github.com/geo511-2022/final_project-Yue
 land_cover_type=terra::project(land_cover_type,ndvi_rasters_norm)
 
 land_cover_arr <- as.array(land_cover_type)
+
+print(paste("There are nan values in the land cover data: ",as.character(NaN %in% land_cover_arr,seq='')))
+print(paste("There are infinitive values in the land cover data ",as.character(Inf %in% land_cover_arr,seq='')))
 ```
 
 
@@ -544,28 +547,33 @@ for(i in 1:1634){
 }
 
 image(all_variables_mask,asp=1)
-```
 
+```
+```{r}
+NaN %in% all_variables_mask
+1 %in% binary_mask
+```
 
 ```{r}
 combine_mask <- array(dim=c(1634,2035))
-
+total_valid_count <- 0
 for(m in 1:1634){
   for(n in 1:2035){
-    if(is.nan(all_variables_mask[m,n]) || is.nan(binary_mask[m,n])){
+    if(is.nan(binary_mask[m,n])){
       combine_mask[m,n] = -1
     }
-    else if(all_variables_mask[m,n] == 1 && binary_mask[m,n] == 1){
-      combine_mask[m,n] = 1
+    else if(all_variables_mask[m,n] == -1){
+      combine_mask[m,n] = -1
     }
     else{
-      combine_mask[m,n] = -1
+      combine_mask[m,n] = 1
+      total_valid_count <- total_valid_count + 1
     }
   }
 }
 
 image(combine_mask,asp=1)
-
+print(total_valid_count)
 #1 %in% all_variables_mask
 
 #valid_number <- 0
@@ -583,92 +591,72 @@ image(combine_mask,asp=1)
 #train_number = as.integer(valid_number*0.75)
 #test_number = as.integer(valid_number*0.25)
 ```
-
-
 ```{r}
-lab_dict = c('20.0'=0,
-             '30.0'=1,
-             '41.0'=2,
-             '42.0'=3,
-             '43.0'=4,
-             '50.0'=5,
-             '60.0'=6,
-             '80.0'=7,
-             '90.0'=8,
-             '112.0'=9,
-             '114.0'=10,
-             '116.0'=11,
-             '124.0'=12,
-             '126.0'=13)
-```
-
-
-```{r}
-#total_dataset = array(c(valid_number,120,7))
-
-#total_label = array(c(valid_number,1))
-
-#total_dataset_count = 1
-
-#for(i in 1:1634){
-#  for(j in 1:2035){
-#    if(combine_mask[i,j] == 1){
-#      total_dataset[total_dataset_count,,] = all_variables[i,j,,]
-#      trans_lab = lab_dict[[as.character(class_arr[i,j,1])]]
-#      total_label[total_dataset_count,1] = trans_lab
-#      total_dataset_count = total_dataset_count+1
-#    }
-#  }
-#}
-
-
-
-total_dataset = array(dim=c(valid_number,12,7))
-
-total_label = array(dim=c(valid_number,1))
-
-total_dataset_count = 1
-
-for(i in 1:1634){
-  for(j in 1:2035){
-    if(combine_mask[i,j] == 1){
-      total_dataset[total_dataset_count,,] = all_variables[i,j,,]
-      trans_lab = lab_dict[[as.character(class_arr[i,j,1])]]
-      total_label[total_dataset_count,1] = trans_lab
-      total_dataset_count = total_dataset_count+1
+total_dataset <- array(dim = c(total_valid_count,12,7))
+total_label <- array(dim = c(total_valid_count,1))
+total_dataset_count <- 0
+for(m in 1:1634){
+  for(n in 1:2035){
+    if(combine_mask[m,n] == 1){
+      for(i in 1:12){
+        total_dataset[total_dataset_count,i,1] = ndvi_arr_norm[m,n,i]
+        total_dataset[total_dataset_count,i,2] = prec_arr_norm[m,n,i]
+        total_dataset[total_dataset_count,i,3] = rsds_arr_norm[m,n,i]
+        total_dataset[total_dataset_count,i,4] = tas_arr_norm[m,n,i]
+        total_dataset[total_dataset_count,i,5] = env_arr_norm[m,n,1]
+        total_dataset[total_dataset_count,i,6] = env_arr_norm[m,n,2]
+        total_dataset[total_dataset_count,i,7] = env_arr_norm[m,n,3]
+      }
+      if(binary_mask[m,n] == 105){
+        total_label[total_dataset_count,1] = 1
+      }
+      else{
+        total_label[total_dataset_count,1] = 0
+      }
+      total_dataset_count <- total_dataset_count + 1
     }
   }
 }
 ```
 
+```{r}
+test_a <- array(1:8,dim = c(2,2,2))
+
+test_b <- array(dim = c(2,2,2))
+
+test_b[1,,] = test_a[1,,]
+test_b
+```
+
+
+
 
 ```{r}
-valid_number
-total_label
-
 set.seed(10000)
-random_int <- sample(1:valid_number, train_number, replace = FALSE)
-train_dataset = list()
-train_label = list()
-test_dataset = list()
-test_label = list()
-
-total_train_num <- 1
-total_test_num <- 1
-for(i in 1:valid_number){
-  if(i %in% random_int){
-    train_dataset[[total_train_num]] <- total_dataset[,i,]
-    train_label[[total_train_num]] <- total_label[i,]
-    total_train_num = total_train_num + 1
+random_number <- sample(1:total_valid_count,as.integer(0.75*total_valid_count),replace=F)
+train_dataset <- array(dim=c(as.integer(0.75*total_valid_count),12,7))
+train_label <- array(dim=c(as.integer(0.75*total_valid_count),1))
+test_dataset <- array(dim=c(as.integer(0.25*total_valid_count),12,7))
+test_label <- array(dim=c(as.integer(0.25*total_valid_count),1))
+train_count <- 0
+test_count <- 0
+for(i in 1:total_valid_count){
+  if(i %in% random_number){
+    train_dataset[train_count,,] = total_dataset[i,,]
+    train_label[train_count,] = total_label[i,]
+    train_count = train_count + 1
   }
   else{
-    test_dataset[[total_test_num]] <- total_dataset[,i,]
-    test_label[[total_test_num]] <- total_label[i,]
-    total_test_num = total_test_num + 1
+    test_dataset[test_count,,] = total_dataset[i,,]
+    test_label[test_count,] = total_label[i,]
+    test_count = test_count + 1
   }
 }
 
+
 ```
+
+
 ## build the training and testing dataset
 
 Load the land cover classification dataset and compare the value of each pixel from year to year. Save the location of pixels which don't change during the study period and build a mask based on these pixels.
