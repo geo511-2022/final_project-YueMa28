@@ -34,11 +34,10 @@ In this study I planned to use ten years as the study period, however the large 
 
 Here I list all the packages that I used in this study.
 
+
 ```{r, message=F, warning=F}
-library(tensorflow)
 library(raster)
 library(lubridate)
-library(keras)
 library(sp)
 library(timechange)
 library(plot3D)
@@ -50,7 +49,8 @@ library(countcolors)
 library(tidyterra)
 library(downloader)
 library(sf)
-
+library(keras)
+library(tensorflow)
 ```
 
 ## Creat time series to collect data from github
@@ -620,14 +620,12 @@ for(m in 1:1634){
 ```
 
 ```{r}
-test_a <- array(1:8,dim = c(2,2,2))
+test_a <- array(1:4,dim=c(2,2))
+dim(test_a)
+dim(test_a) <- c(2,2,1)
 
-test_b <- array(dim = c(2,2,2))
-
-test_b[1,,] = test_a[1,,]
-test_b
+dim(test_a)
 ```
-
 
 
 
@@ -653,7 +651,10 @@ for(i in 1:total_valid_count){
   }
 }
 
-
+dim(train_dataset) <- c(as.integer(0.75*total_valid_count),12,7,1)
+train_label <- to_categorical(train_label,2)
+dim(test_dataset) <- c(as.integer(0.25*total_valid_count),12,7,1)
+test_label <- to_categorical(test_label,2)
 ```
 
 
@@ -674,24 +675,47 @@ Build the ResNet model and train it with the training dataset.
 
 Test the models with testing dataset, and evaluate them.
 ```{r}
-FCN_model <- keras_model_sequential()
+FCN_model <-keras_model_sequential()
 FCN_model %>%
-  layer_input(input_shape=c(120,7,1)) %>%
-  layer_conv_2d(128,5,1,padding = 'same') %>%
+  #layer_input(shape=c(12,7,1)) %>%
+  layer_conv_2d(filter=128,kernel_size=c(5,5),strides=1,padding = 'same',input_shape = c(12,7,1)) %>%
   layer_batch_normalization() %>%
   layer_activation('relu') %>%
-  layer_conv_2d(256,5,1,padding = 'same') %>%
+  layer_conv_2d(filter=256,kernel_size=c(5,5),strides=1,padding = 'same') %>%
   layer_batch_normalization() %>%
   layer_activation('relu') %>%
-  layer_conv_2d(128,3,1,padding = 'same') %>%
+  layer_conv_2d(filters = 128,kernel_size=c(3,3),strides=1,padding = 'same') %>%
   layer_batch_normalization() %>%
   layer_activation('relu') %>%
-  layer_average_pooling_2d() %>%
-  layer_dense(14,activation = 'softmax')
+  layer_global_average_pooling_2d() %>%
+  layer_dense(2,activation = 'softmax')
 
-summary(FCN_model)
+FCN_model %>% compile(
+  optimizer = 'adam',
+  loss = 'binary_crossentropy',
+  metrics = c('accuracy')
+)
+
+
+
+history = FCN_model %>%
+  fit(train_dataset,
+      train_label,
+      epoch = 5,
+      batch_size = 10,
+      verbose=1)
+
 
 ```
+```{r}
+summary(FCN_model)
+```
+
+```{r}
+FCN_model %>% evaluate(test_dataset, test_label)
+```
+
+
 
 # Results
 
