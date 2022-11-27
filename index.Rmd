@@ -6,7 +6,7 @@ subtitle: Using time series data to train deep learning models for classificatio
 
 # Introduction
 
-Time series data is of tremendous importance in the field of environmental sustainability. Exploring this kind of data helps us understand the pattern of ecosystems, which allows us to detect the abnormal changes in time and help the relative department to make decisions. In this study, I will compare the performances of two state-of-the-art time series classification (TSC) models, fully convectional neural network (FCN) and deep Residual Network (ResNet).
+Time series data is of tremendous importance in the field of environmental sustainability. Exploring this kind of data helps us understand the pattern of ecosystems, which allows us to detect the abnormal changes in time and help the relative department to make decisions. In this study, I will use one state-of-the-art time series classification (TSC) model, fully convectional neural network (FCN) to classify the landcover type in Cape Floristic Region.
 
 # Materials and methods
 
@@ -16,10 +16,10 @@ This study can be divided into four parts:
 In this part, I collected the aforementioned data and normalized them into the same value range (Except the NDVI data). The normalized value range for the NDVI data is [-1,1], while the normalized value range for the other environmental variables is (0,1]. 
 
 2) build training and testing data sets:
-Based the land cover classification data, I select pixels that do not change during the study period and build a mask based on them. This mask is then applied to select pixels from the NDVI and environmental variables data. Then the label from the classification data and the data from previous step are combined together and then splited into training and testing datasets.
+Based on the land cover classification data, I select pixels that do not change during the study period and build a mask based on them. This mask is then applied to select pixels from the NDVI and environmental variables data. Then the label from the classification data and the data from previous step are combined together and then splited into training and testing datasets.
 
 3) build and train deep learning models:
-The deep learning models used in this paper is proposed in XXX Wang's paper in 2017. In this paper, I keep the original structures of the models in the paper and 
+The deep learning model used in this study is proposed in *Time series classification from scratch with deep neural networks: A strong baseline* in 2017. In this paper, I keep the original structure of the model from the paper and train the model with our dataset.
 
 4) discussion:
 Based on the results I get from the previous step, the performances of these two models are analyzed and the results have referential significance to relative studies.
