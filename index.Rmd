@@ -35,7 +35,7 @@ In this study I planned to use ten years as the study period, however the large 
 Here I list all the packages that I used in this study.
 
 
-```{r, message=F, warning=F}
+```{r}
 library(raster)
 library(lubridate)
 library(sp)
