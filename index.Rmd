@@ -4,12 +4,28 @@ author: Yue Ma
 subtitle: Using time series data to train deep learning models for classification
 ---
 
-# Introduction
+## Introduction
 
 Time series data is of tremendous importance in the field of environmental sustainability. Exploring this kind of data helps us understand the pattern of ecosystems, which allows us to detect the abnormal changes in time and help the relative department to make decisions. In this study, I will use one state-of-the-art time series classification (TSC) model, fully convectional neural network (FCN) to classify the landcover type in Cape Floristic Region.
 
-# Materials and methods
+## Materials and methods
+# Proposed data sources
 
+[land cover classification dataset](https://egis.environment.gov.za/sa_national_land_cover_datasets): This dataset is released by the Forestry, Fisheries and the Environment Department of Republic of South Africa. The dataset demonstrates the land cover change in South Africa from 1990 to 2020.
+
+[NDVI data](https://lpdaac.usgs.gov/products/mod13q1v006/): The time period of the NDVI data is from 2009 to 2018.
+
+[CHELSA  dataset](https://chelsa-climate.org/downloads/): monthly precipitation data, temperature data (mean) and radiation data of study area from 2009 to 2018.
+
+[soil data](https://github.com/AdamWilsonLab/emma_envdata/releases/download/processed_static/soil_Total_N_.tif): Total N in the soil of study area. In this study I assume that the soil data of the study area does not change from 2009 to 2018.
+
+[seasonality concentration data](https://github.com/AdamWilsonLab/emma_envdata/releases/download/processed_static/MODCF_seasonality_concentration.tif): Cloud fraction seasonality concentration of the study area. In this study I assume that the seasonality concentration data of the study area does not change from 2009 to 2018.
+
+[DEM data](https://github.com/AdamWilsonLab/emma_envdata/releases/download/processed_static/nasadem.tif): the digital elevation model of study area.In this study I assume that the DEM data of the study area does not change from 2009 to 2018.
+
+The data used in this study is in two categories: static and dynamic. The precipitation data, temperature data and radiation data are considered as dynamic data while the soil data, DEM data and seasonality concentration data are considered as static data. (Another potential research question for this study is whether the static and dynamic data have same importance in this classification task)
+
+# Methods
 This study can be divided into four parts:
 
 1) data collection and pre-processing: 
@@ -19,21 +35,20 @@ In this part, I collected the aforementioned data and normalized them into the s
 Based on the land cover classification data, I select pixels that do not change during the study period and build a mask based on them. This mask is then applied to select pixels from the NDVI and environmental variables data. Then the label from the classification data and the data from previous step are combined together and then splited into training and testing datasets.
 
 3) build and train deep learning models:
-The deep learning model used in this study is proposed in *Time series classification from scratch with deep neural networks: A strong baseline* in 2017. In this paper, I keep the original structure of the model from the paper and train the model with our dataset.
+The deep learning model used in this study is proposed in *Time series classification from scratch with deep neural networks: A strong baseline* in 2017. In this study, I keep the original structure of the model from the paper and train the model with our dataset.
 
 4) discussion:
 Based on the results I get from the previous step, the performance of FCN models will be analyzed.
 
-![](https://github.com/geo511-2022/final_project-YueMa28/blob/master/flowwork.png)
+
 
 ## Before the code
 
-In this study I planned to use ten years as the study period, however the large size of dataset would run into 'Error: vector memory exhausted (limit reached?)' Error. So on this website, I will only use one year as the study period. If you are interested in the original code, please copy and paste the commented parts of code and run them on a powerful server.
+In this study I planned to use ten years as the study period, however the large size of dataset would run into 'Error: vector memory exhausted (limit reached?)' Error. So on this website, I will only use one year as the study period. If you are interested in the original code, please contact me (yma28@buffalo.edu).
 
 ## Demo (using data from 2018 as an example)
 
 Here I list all the packages that I used in this study.
-
 
 ```{r}
 library(raster)
