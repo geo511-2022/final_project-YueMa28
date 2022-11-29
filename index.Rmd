@@ -49,6 +49,12 @@ In this study I planned to use ten years as the study period, however the large 
 ## Demo (using data from 2018 as an example)
 
 Here I list all the packages that I used in this study.
+```{r}
+library(keras)
+library(tensorflow)
+install_keras()
+```
+
 
 ```{r}
 library(raster)
@@ -64,8 +70,7 @@ library(countcolors)
 library(tidyterra)
 library(downloader)
 library(sf)
-library(keras)
-library(tensorflow)
+
 ```
 
 ## Creat time series to collect data from github
