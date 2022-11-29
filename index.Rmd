@@ -50,9 +50,11 @@ In this study I planned to use ten years as the study period, however the large 
 
 Here I list all the packages that I used in this study.
 ```{r}
+install_keras()
+install_tensorflow()
 library(keras)
 library(tensorflow)
-use_condaenv("keras-tf", required = T)
+
 ```
 
 
