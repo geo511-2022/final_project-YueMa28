@@ -52,7 +52,7 @@ Here I list all the packages that I used in this study.
 ```{r}
 library(keras)
 library(tensorflow)
-install_keras()
+use_condaenv("keras-tf", required = T)
 ```
 
 
