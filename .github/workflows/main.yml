@@ -11,7 +11,7 @@ jobs:
         run: |-
           Rscript -e "install.packages('remotes', repos = 'https://demo.rstudiopm.com/all/__linux__/bionic/latest')"
           Rscript -e "remotes::install_deps(dependencies = TRUE, repos = 'https://demo.rstudiopm.com/all/__linux__/bionic/latest')"
-          Rscript -e "install.packages(c('testthat','RCurl','questionr','raster','lubridate','sp','timechange','plot3D','ggplot2','piggyback','dst','reticulate','countcolors','tidyterra','downloader','sf',keras','tensorflow'))"
+          Rscript -e "install.packages(c('testthat','RCurl','questionr','raster','lubridate','sp','timechange','plot3D','ggplot2','piggyback','dst','reticulate','countcolors','tidyterra','downloader','sf','keras','tensorflow'))"
           Rscript -e "questionr::qscan(list.files(pattern='*.R',recursive=T), load = TRUE, detail = FALSE)"
       - name: Render Site
         env:
