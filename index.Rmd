@@ -49,13 +49,7 @@ In this study I planned to use ten years as the study period, however the large 
 ## Demo (using data from 2018 as an example)
 
 Here I list all the packages that I used in this study.
-```{r}
-install_keras()
-install_tensorflow()
-library(keras)
-library(tensorflow)
 
-```
 
 
 ```{r}
@@ -72,7 +66,8 @@ library(countcolors)
 library(tidyterra)
 library(downloader)
 library(sf)
-
+library(keras)
+library(tensorflow)
 ```
 
 ## Creat time series to collect data from github
@@ -643,39 +638,39 @@ test_label <- to_categorical(test_label,2)
 ```
 Here we build the FCN model and train it with our training dataset. Due to the limitation of Github memory, I set the epoch to 5. Please feel free to change the epoch and batch_size number based on the memory of your server.
 ```{r}
-FCN_model <-keras_model_sequential()
-FCN_model %>%
+#FCN_model <-keras_model_sequential()
+#FCN_model %>%
   #layer_input(shape=c(12,7,1)) %>%
-  layer_conv_2d(filter=128,kernel_size=c(5,5),strides=1,padding = 'same',input_shape = c(12,7,1)) %>%
-  layer_batch_normalization() %>%
-  layer_activation('relu') %>%
-  layer_conv_2d(filter=256,kernel_size=c(5,5),strides=1,padding = 'same') %>%
-  layer_batch_normalization() %>%
-  layer_activation('relu') %>%
-  layer_conv_2d(filters = 128,kernel_size=c(3,3),strides=1,padding = 'same') %>%
-  layer_batch_normalization() %>%
-  layer_activation('relu') %>%
-  layer_global_average_pooling_2d() %>%
-  layer_dense(2,activation = 'softmax')
+#  layer_conv_2d(filter=128,kernel_size=c(5,5),strides=1,padding = 'same',input_shape = c(12,7,1)) %>%
+#  layer_batch_normalization() %>%
+#  layer_activation('relu') %>%
+#  layer_conv_2d(filter=256,kernel_size=c(5,5),strides=1,padding = 'same') %>%
+#  layer_batch_normalization() %>%
+#  layer_activation('relu') %>%
+#  layer_conv_2d(filters = 128,kernel_size=c(3,3),strides=1,padding = 'same') %>%
+#  layer_batch_normalization() %>%
+#  layer_activation('relu') %>%
+#  layer_global_average_pooling_2d() %>%
+#  layer_dense(2,activation = 'softmax')
 
-FCN_model %>% compile(
-  optimizer = 'adam',
-  loss = 'binary_crossentropy',
-  metrics = c('accuracy')
-)
+#FCN_model %>% compile(
+#  optimizer = 'adam',
+#  loss = 'binary_crossentropy',
+#  metrics = c('accuracy')
+#)
 
-history = FCN_model %>%
-  fit(train_dataset,
-      train_label,
-      epoch = 5,
-      batch_size = 10,
-      verbose=1)
+#history = FCN_model %>%
+#  fit(train_dataset,
+#      train_label,
+#      epoch = 5,
+#      batch_size = 10,
+#      verbose=1)
 
 
 ```
 Here we show the structure of our trained model.
 ```{r}
-summary(FCN_model)
+#summary(FCN_model)
 ```
 # Results
 
