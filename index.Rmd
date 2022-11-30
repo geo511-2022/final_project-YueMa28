@@ -631,16 +631,15 @@ for(i in 1:total_valid_count){
   }
 }
 
-dim(train_dataset) <- c(as.integer(0.75*total_valid_count),12,7,1)
-train_label <- to_categorical(train_label,2)
-dim(test_dataset) <- c(as.integer(0.25*total_valid_count),12,7,1)
-test_label <- to_categorical(test_label,2)
+#dim(train_dataset) <- c(as.integer(0.75*total_valid_count),12,7,1)
+#train_label <- to_categorical(train_label,2)
+#dim(test_dataset) <- c(as.integer(0.25*total_valid_count),12,7,1)
+#test_label <- to_categorical(test_label,2)
 ```
 Here we build the FCN model and train it with our training dataset. Due to the limitation of Github memory, I set the epoch to 5. Please feel free to change the epoch and batch_size number based on the memory of your server.
 ```{r}
 #FCN_model <-keras_model_sequential()
 #FCN_model %>%
-  #layer_input(shape=c(12,7,1)) %>%
 #  layer_conv_2d(filter=128,kernel_size=c(5,5),strides=1,padding = 'same',input_shape = c(12,7,1)) %>%
 #  layer_batch_normalization() %>%
 #  layer_activation('relu') %>%
