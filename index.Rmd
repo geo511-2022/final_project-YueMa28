@@ -66,8 +66,8 @@ library(countcolors)
 library(tidyterra)
 library(downloader)
 library(sf)
-library(keras)
-library(tensorflow)
+#library(keras)
+#library(tensorflow)
 ```
 
 ## Creat time series to collect data from github
