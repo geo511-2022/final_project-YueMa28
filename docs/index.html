@@ -12,7 +12,7 @@
 <meta name="author" content="Yue Ma" />
 
 
-<title>what does time tell</title>
+<title>What does time tell?</title>
 
 <script src="site_libs/header-attrs-2.14/header-attrs.js"></script>
 <script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
@@ -339,16 +339,16 @@ div.tocify {
 
 
 
-<h1 class="title toc-ignore">what does time tell</h1>
-<h3 class="subtitle">Using time series data to train deep learning
-models for classification</h3>
+<h1 class="title toc-ignore">What does time tell?</h1>
+<h3 class="subtitle">Using time series data to train deep learning model
+for land cover classification</h3>
 <h4 class="author">Yue Ma</h4>
 
 </div>
 
 
-<div id="introduction" class="section level2">
-<h2>Introduction</h2>
+<div id="introduction" class="section level1">
+<h1>Introduction</h1>
 <p>Time series data is of tremendous importance in the field of
 environmental sustainability. Exploring this kind of data helps us
 understand the pattern of ecosystems, which allows us to detect the
@@ -357,11 +357,10 @@ decisions. In this study, I will use one state-of-the-art time series
 classification (TSC) model, fully convectional neural network (FCN) to
 classify the landcover type in Cape Floristic Region.</p>
 </div>
-<div id="materials-and-methods" class="section level2">
-<h2>Materials and methods</h2>
-</div>
-<div id="proposed-data-sources" class="section level1">
-<h1>Proposed data sources</h1>
+<div id="materials-and-methods" class="section level1">
+<h1>Materials and methods</h1>
+<div id="proposed-data-sources" class="section level2">
+<h2>Proposed data sources</h2>
 <p><a
 href="https://egis.environment.gov.za/sa_national_land_cover_datasets">land
 cover classification dataset</a>: This dataset is released by the
@@ -394,8 +393,8 @@ concentration data are considered as static data. (Another potential
 research question for this study is whether the static and dynamic data
 have same importance in this classification task)</p>
 </div>
-<div id="methods" class="section level1">
-<h1>Methods</h1>
+<div id="methods" class="section level2">
+<h2>Methods</h2>
 <p>This study can be divided into four parts:</p>
 <ol style="list-style-type: decimal">
 <li><p>data collection and pre-processing: In this part, I collected the
@@ -418,8 +417,10 @@ and train the model with our dataset.</p></li>
 <li><p>discussion: Based on the results I get from the previous step,
 the performance of FCN models will be analyzed.</p></li>
 </ol>
-<div id="before-the-code" class="section level2">
-<h2>Before the code</h2>
+</div>
+</div>
+<div id="before-the-code" class="section level1">
+<h1>Before the code</h1>
 <p>In this study I planned to use ten years as the study period, however
 the large size of dataset would run into ‘Error: vector memory exhausted
 (limit reached?)’ Error. So on this website, I will only use one year as
@@ -428,8 +429,8 @@ contact me (<a href="mailto:yma28@buffalo.edu"
 class="email">yma28@buffalo.edu</a>).</p>
 </div>
 <div id="demo-using-data-from-2018-as-an-example"
-class="section level2">
-<h2>Demo (using data from 2018 as an example)</h2>
+class="section level1">
+<h1>Demo (using data from 2018 as an example)</h1>
 <p>Here I list all the packages that I used in this study.</p>
 <pre class="r"><code>library(raster)</code></pre>
 <pre><code>## Loading required package: sp</code></pre>
@@ -478,7 +479,6 @@ library(sf)</code></pre>
 ## The following object is masked from &#39;package:dst&#39;:
 ## 
 ##     shape</code></pre>
-</div>
 <div id="creat-time-series-to-collect-data-from-github"
 class="section level2">
 <h2>Creat time series to collect data from github</h2>
@@ -611,17 +611,17 @@ ggplot() +
   geom_spatraster(data=ndvi_rasters) +
   facet_wrap(~lyr, ncol = 4) </code></pre>
 <pre><code>## SpatRaster resampled to ncells = 500860</code></pre>
-<p><img src="index_files/figure-html/unnamed-chunk-4-1.png" width="672" />
-This part normalizes the NDVI data from original value range ([80,200])
-to new value range ([-1,1]).</p>
+<p><img src="index_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
+<p>This part normalizes the NDVI data from original value range
+([80,200]) to new value range ([-1,1]).</p>
 <pre class="r"><code>ndvi_rasters_norm &lt;- (ndvi_rasters-100)/100
 
 ggplot() +
   geom_spatraster(data=ndvi_rasters_norm) +
   facet_wrap(~lyr, ncol = 4) </code></pre>
 <pre><code>## SpatRaster resampled to ncells = 500860</code></pre>
-<p><img src="index_files/figure-html/unnamed-chunk-5-1.png" width="672" />
-This part calculates the exact value range of this normalized NDVI
+<p><img src="index_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
+<p>This part calculates the exact value range of this normalized NDVI
 data.</p>
 <pre class="r"><code>ndvi_arr_norm = as.array(ndvi_rasters_norm)
 
@@ -635,10 +635,12 @@ print(paste(&quot;There are nan values in NDVI data: &quot;,as.character(NaN %in
 <pre><code>## [1] &quot;The max value of NDVI data (without nan):  0.99&quot;</code></pre>
 <p>This part visualizes the normalized NDVI data.</p>
 <pre class="r"><code>image(ndvi_arr_norm[nrow(ndvi_arr_norm):1,,1],asp=1)</code></pre>
-<p><img src="index_files/figure-html/unnamed-chunk-7-1.png" width="672" />
-# collect the environmental data The environmental data have been
-already downloaded and uploaded in the release. Here is the code for
-loading them.</p>
+<p><img src="index_files/figure-html/unnamed-chunk-7-1.png" width="672" /></p>
+</div>
+<div id="collect-the-environmental-data" class="section level1">
+<h1>collect the environmental data</h1>
+<p>The environmental data have been already downloaded and uploaded in
+the release. Here is the code for loading them.</p>
 <pre class="r"><code>env_filelist = c()
 
 env_filelist[1] = &quot;https://github.com/geo511-2022/final_project-YueMa28/releases/download/ENV/nasadem.tif&quot;
@@ -652,8 +654,8 @@ ggplot() +
   geom_spatraster(data=env_rasters) +
   facet_wrap(~lyr, ncol = 3) </code></pre>
 <pre><code>## SpatRaster resampled to ncells = 500860</code></pre>
-<p><img src="index_files/figure-html/unnamed-chunk-8-1.png" width="672" />
-This part shows the value range of environmental variables.</p>
+<p><img src="index_files/figure-html/unnamed-chunk-8-1.png" width="672" /></p>
+<p>This part shows the value range of environmental variables.</p>
 <pre class="r"><code>env_arr_ori = as.array(env_rasters)
 
 print(paste(&quot;There are nan values in static data: &quot;,as.character(NaN %in% env_arr_ori,seq=&#39;&#39;)))</code></pre>
@@ -691,8 +693,8 @@ ggplot() +
   geom_spatraster(data=env_rasters_norm) +
   facet_wrap(~lyr, ncol = 3) </code></pre>
 <pre><code>## SpatRaster resampled to ncells = 500860</code></pre>
-<p><img src="index_files/figure-html/unnamed-chunk-10-1.png" width="672" />
-Here we explore the detailed information about the normalized
+<p><img src="index_files/figure-html/unnamed-chunk-10-1.png" width="672" /></p>
+<p>Here we explore the detailed information about the normalized
 environmental data.</p>
 <pre class="r"><code>env_arr_norm = as.array(env_rasters_norm)
 
@@ -725,8 +727,8 @@ ggplot() +
   geom_spatraster(data=pr_rasters) +
   facet_wrap(~lyr, ncol = 4) </code></pre>
 <pre><code>## SpatRaster resampled to ncells = 500860</code></pre>
-<p><img src="index_files/figure-html/unnamed-chunk-12-1.png" width="672" />
-Here we explore the detailed information of precipitation data.</p>
+<p><img src="index_files/figure-html/unnamed-chunk-12-1.png" width="672" /></p>
+<p>Here we explore the detailed information of precipitation data.</p>
 <pre class="r"><code>prec_arr_ori &lt;- as.array(pr_rasters)
 
 print(paste(&quot;There are nan values in precipitation data: &quot;,as.character(NaN %in% prec_arr_ori,seq=&#39;&#39;)))</code></pre>
@@ -762,8 +764,8 @@ ggplot() +
   geom_spatraster(data=pr_rasters_norm) +
   facet_wrap(~lyr, ncol = 4) </code></pre>
 <pre><code>## SpatRaster resampled to ncells = 500860</code></pre>
-<p><img src="index_files/figure-html/unnamed-chunk-14-1.png" width="672" />
-Here we explore more about the normalized precipitation data.</p>
+<p><img src="index_files/figure-html/unnamed-chunk-14-1.png" width="672" /></p>
+<p>Here we explore more about the normalized precipitation data.</p>
 <pre class="r"><code>prec_arr_norm &lt;- as.array(pr_rasters_norm)
 
 print(paste(&quot;There are nan values in precipitation data: &quot;,as.character(NaN %in% prec_arr_norm,seq=&#39;&#39;)))</code></pre>
@@ -790,8 +792,8 @@ ggplot() +
   geom_spatraster(data=rsds_rasters) +
   facet_wrap(~lyr, ncol = 4) </code></pre>
 <pre><code>## SpatRaster resampled to ncells = 500860</code></pre>
-<p><img src="index_files/figure-html/unnamed-chunk-16-1.png" width="672" />
-Here we explore the details of the original rsds data.</p>
+<p><img src="index_files/figure-html/unnamed-chunk-16-1.png" width="672" /></p>
+<p>Here we explore the details of the original rsds data.</p>
 <pre class="r"><code>rsds_arr_ori &lt;- as.array(rsds_rasters)
 print(paste(&quot;There are nan values in downwelling shortwave flux data: &quot;,as.character(NaN %in% rsds_arr_ori,seq=&#39;&#39;)))</code></pre>
 <pre><code>## [1] &quot;There are nan values in downwelling shortwave flux data:  TRUE&quot;</code></pre>
@@ -825,8 +827,8 @@ ggplot() +
   geom_spatraster(data=rsds_rasters_norm) +
   facet_wrap(~lyr, ncol = 4) </code></pre>
 <pre><code>## SpatRaster resampled to ncells = 500860</code></pre>
-<p><img src="index_files/figure-html/unnamed-chunk-18-1.png" width="672" />
-Here we explore more about normalized rsds data.</p>
+<p><img src="index_files/figure-html/unnamed-chunk-18-1.png" width="672" /></p>
+<p>Here we explore more about normalized rsds data.</p>
 <pre class="r"><code>rsds_arr_norm &lt;- as.array(rsds_rasters_norm)
 print(paste(&quot;There are nan values in downwelling shortwave flux data: &quot;,as.character(NaN %in% rsds_arr_norm,seq=&#39;&#39;)))</code></pre>
 <pre><code>## [1] &quot;There are nan values in downwelling shortwave flux data:  TRUE&quot;</code></pre>
@@ -852,8 +854,8 @@ ggplot() +
   geom_spatraster(data=tas_rasters) +
   facet_wrap(~lyr, ncol = 4) </code></pre>
 <pre><code>## SpatRaster resampled to ncells = 500860</code></pre>
-<p><img src="index_files/figure-html/unnamed-chunk-20-1.png" width="672" />
-Here we explore more about the original tas data.</p>
+<p><img src="index_files/figure-html/unnamed-chunk-20-1.png" width="672" /></p>
+<p>Here we explore more about the original tas data.</p>
 <pre class="r"><code>tas_arr_ori &lt;- as.array(tas_rasters)
 print(paste(&quot;There are nan values in mean daily airtemperature data: &quot;,as.character(NaN %in% tas_arr_ori,seq=&#39;&#39;)))</code></pre>
 <pre><code>## [1] &quot;There are nan values in mean daily airtemperature data:  TRUE&quot;</code></pre>
@@ -887,8 +889,8 @@ ggplot() +
   geom_spatraster(data=tas_rasters_norm) +
   facet_wrap(~lyr, ncol = 4) </code></pre>
 <pre><code>## SpatRaster resampled to ncells = 500860</code></pre>
-<p><img src="index_files/figure-html/unnamed-chunk-22-1.png" width="672" />
-Here we explore more about the normalized tas data.</p>
+<p><img src="index_files/figure-html/unnamed-chunk-22-1.png" width="672" /></p>
+<p>Here we explore more about the normalized tas data.</p>
 <pre class="r"><code>tas_arr_norm &lt;- as.array(tas_rasters_norm)
 print(paste(&quot;There are nan values in mean daily airtemperature data: &quot;,as.character(NaN %in% tas_arr_norm,seq=&#39;&#39;)))</code></pre>
 <pre><code>## [1] &quot;There are nan values in mean daily airtemperature data:  TRUE&quot;</code></pre>
@@ -934,8 +936,8 @@ for(i in 1:1634){
 }
 
 image(binary_mask,asp=1)</code></pre>
-<p><img src="index_files/figure-html/unnamed-chunk-26-1.png" width="672" />
-Here we created a mask that distinguish pixels whose values are all
+<p><img src="index_files/figure-html/unnamed-chunk-26-1.png" width="672" /></p>
+<p>Here we created a mask that distinguish pixels whose values are all
 valid from the pixels which contains invalid data. Then we visualize the
 mask.</p>
 <pre class="r"><code>#all_variables_arr &lt;- array(dim=c(1634,2035,12,7))
@@ -982,8 +984,8 @@ for(i in 1:1634){
 }
 
 image(all_variables_mask,asp=1)</code></pre>
-<p><img src="index_files/figure-html/unnamed-chunk-27-1.png" width="672" />
-Here we combine the two masks we created above and select pixels to
+<p><img src="index_files/figure-html/unnamed-chunk-27-1.png" width="672" /></p>
+<p>Here we combine the two masks we created above and select pixels to
 train our model. Then we visualize the combined mask.</p>
 <pre class="r"><code>combine_mask &lt;- array(dim=c(1634,2035))
 total_valid_count &lt;- 0
@@ -1006,22 +1008,6 @@ image(combine_mask,asp=1)</code></pre>
 <p><img src="index_files/figure-html/unnamed-chunk-28-1.png" width="672" /></p>
 <pre class="r"><code>print(total_valid_count)</code></pre>
 <pre><code>## [1] 517642</code></pre>
-<pre class="r"><code>#1 %in% all_variables_mask
-
-#valid_number &lt;- 0
-#for(i in 1:1634){
-#  for(j in 1:2035){
-#    if(combine_mask[i,j]==1){
-#      valid_number = valid_number + 1
-#    }
-#    else{
-#      next
-#    }
-#  }
-#}
-#valid_number
-#train_number = as.integer(valid_number*0.75)
-#test_number = as.integer(valid_number*0.25)</code></pre>
 <p>Here we extract the time-series data from the selected pixels and
 combine them into two arrays.</p>
 <pre class="r"><code>total_dataset &lt;- array(dim = c(total_valid_count,12,7))
@@ -1083,7 +1069,6 @@ feel free to change the epoch and batch_size number based on the memory
 of your server.</p>
 <pre class="r"><code>FCN_model &lt;-keras_model_sequential()
 FCN_model %&gt;%
-  #layer_input(shape=c(12,7,1)) %&gt;%
   layer_conv_2d(filter=128,kernel_size=c(5,5),strides=1,padding = &#39;same&#39;,input_shape = c(12,7,1)) %&gt;%
   layer_batch_normalization() %&gt;%
   layer_activation(&#39;relu&#39;) %&gt;%

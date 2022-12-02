@@ -1,15 +1,15 @@
 ---
-title: "what does time tell"
+title: "What does time tell?"
 author: Yue Ma
-subtitle: Using time series data to train deep learning models for classification
+subtitle: Using time series data to train deep learning model for land cover classification
 ---
 
-## Introduction
+# Introduction
 
 Time series data is of tremendous importance in the field of environmental sustainability. Exploring this kind of data helps us understand the pattern of ecosystems, which allows us to detect the abnormal changes in time and help the relative department to make decisions. In this study, I will use one state-of-the-art time series classification (TSC) model, fully convectional neural network (FCN) to classify the landcover type in Cape Floristic Region.
 
-## Materials and methods
-# Proposed data sources
+# Materials and methods
+## Proposed data sources
 
 [land cover classification dataset](https://egis.environment.gov.za/sa_national_land_cover_datasets): This dataset is released by the Forestry, Fisheries and the Environment Department of Republic of South Africa. The dataset demonstrates the land cover change in South Africa from 1990 to 2020.
 
@@ -25,7 +25,7 @@ Time series data is of tremendous importance in the field of environmental susta
 
 The data used in this study is in two categories: static and dynamic. The precipitation data, temperature data and radiation data are considered as dynamic data while the soil data, DEM data and seasonality concentration data are considered as static data. (Another potential research question for this study is whether the static and dynamic data have same importance in this classification task)
 
-# Methods
+## Methods
 This study can be divided into four parts:
 
 1) data collection and pre-processing: 
@@ -41,18 +41,16 @@ The deep learning model used in this study is proposed in *Time series classific
 Based on the results I get from the previous step, the performance of FCN models will be analyzed.
 
 
-
-## Before the code
+# Before the code
 
 In this study I planned to use ten years as the study period, however the large size of dataset would run into 'Error: vector memory exhausted (limit reached?)' Error. So on this website, I will only use one year as the study period. If you are interested in the original code, please contact me (yma28@buffalo.edu).
 
-## Demo (using data from 2018 as an example)
+# Demo (using data from 2018 as an example)
 
 Here I list all the packages that I used in this study.
 
 
-
-```{r}
+```{r, results='hide'}
 library(raster)
 library(lubridate)
 library(sp)
@@ -66,8 +64,8 @@ library(countcolors)
 library(tidyterra)
 library(downloader)
 library(sf)
-#library(keras)
-#library(tensorflow)
+library(keras)
+library(tensorflow)
 ```
 
 ## Creat time series to collect data from github
@@ -146,6 +144,7 @@ In this part I will show the code for downloading the data from Dr. Wilson's git
 
 ```
 
+
 # Collect NDVI data
 
 This part collected NDVI data from January to December 2018 and visualize them.
@@ -165,6 +164,8 @@ ggplot() +
   facet_wrap(~lyr, ncol = 4) 
 
 ```
+
+
 This part normalizes the NDVI data from original value range ([80,200]) to new value range ([-1,1]).  
 
 ```{r}
@@ -175,7 +176,11 @@ ggplot() +
   facet_wrap(~lyr, ncol = 4) 
 
 ```
+
+
 This part calculates the exact value range of this normalized NDVI data.
+
+
 ```{r}
 ndvi_arr_norm = as.array(ndvi_rasters_norm)
 
@@ -186,13 +191,19 @@ print(paste("The min value of NDVI data (without nan): ",min(ndvi_arr_norm,na.rm
 print(paste("The max value of NDVI data (without nan): ",max(ndvi_arr_norm,na.rm = TRUE)))
 
 ```
+
 This part visualizes the normalized NDVI data.
+
 ```{r}
 image(ndvi_arr_norm[nrow(ndvi_arr_norm):1,,1],asp=1)
 
 ```
+
+
 # collect the environmental data
 The environmental data have been already downloaded and uploaded in the release. Here is the code for loading them.
+
+
 ```{r}
 env_filelist = c()
 
@@ -208,7 +219,11 @@ ggplot() +
   facet_wrap(~lyr, ncol = 3) 
 
 ```
+
+
 This part shows the value range of environmental variables.
+
+
 ```{r}
 env_arr_ori = as.array(env_rasters)
 
@@ -218,7 +233,11 @@ print(paste("There are infinitive values in static data: ",as.character(Inf %in%
 print(paste("The min value of static data (without nan): ",min(env_arr_ori,na.rm = TRUE)))
 print(paste("The max value of static data (without nan): ",max(env_arr_ori,na.rm = TRUE)))
 ```
+
+
 Here we normalized the environmental data and visualize them.
+
+
 ```{r}
 env_rasters_norm1 <- terra::rast()
 
@@ -248,7 +267,9 @@ ggplot() +
 
 
 ```
+
 Here we explore the detailed information about the normalized environmental data.
+
 ```{r}
 env_arr_norm = as.array(env_rasters_norm)
 
@@ -259,9 +280,13 @@ print(paste("The min value of static data (without nan): ",min(env_arr_norm,na.r
 print(paste("The max value of static data (without nan): ",max(env_arr_norm,na.rm = TRUE)))
 
 ```
+
+
 # load the dynamic data
 
 The precipitation (pr), radiation (rsds) and temperature (tas) data have been uploaded in the release part. The code below shows how to load and visualize them.
+
+
 ```{r}
 pr_filelist = c()
 month <- c("01","02","03","04","05","06","07","08","09","10","11","12")
@@ -279,7 +304,11 @@ ggplot() +
   facet_wrap(~lyr, ncol = 4) 
 
 ```
+
+
 Here we explore the detailed information of precipitation data.
+
+
 ```{r}
 prec_arr_ori <- as.array(pr_rasters)
 
@@ -290,7 +319,9 @@ print(paste("The min value of precipitation data (without nan): ",min(prec_arr_o
 print(paste("The max value of precipitation data (without nan): ",max(prec_arr_ori,na.rm = TRUE)))
 
 ```
+
 Here we normalize the precipitation data and visualize them.
+
 ```{r}
 pr_rasters_norm1 <- terra::rast()
 
@@ -317,7 +348,9 @@ ggplot() +
   facet_wrap(~lyr, ncol = 4) 
 
 ```
+
 Here we explore more about the normalized precipitation data.
+
 ```{r}
 prec_arr_norm <- as.array(pr_rasters_norm)
 
@@ -328,7 +361,9 @@ print(paste("The min value of precipitation data (without nan): ",min(prec_arr_n
 print(paste("The max value of precipitation data (without nan): ",max(prec_arr_norm,na.rm = TRUE)))
 
 ```
+
 Here we load the rsds data and visualize them.
+
 ```{r}
 
 rsds_filelist = c()
@@ -346,7 +381,9 @@ ggplot() +
   geom_spatraster(data=rsds_rasters) +
   facet_wrap(~lyr, ncol = 4) 
 ```
+
 Here we explore the details of the original rsds data.
+
 ```{r}
 rsds_arr_ori <- as.array(rsds_rasters)
 print(paste("There are nan values in downwelling shortwave flux data: ",as.character(NaN %in% rsds_arr_ori,seq='')))
@@ -356,7 +393,9 @@ print(paste("The min value of downwelling shortwave flux data (without nan): ",m
 print(paste("The max value of downwelling shortwave flux data (without nan): ",max(rsds_arr_ori,na.rm = TRUE)))
 
 ```
+
 Here we normalize the rsds data and visualize them.
+
 ```{r}
 rsds_rasters_norm1 <- terra::rast()
 
@@ -381,7 +420,9 @@ ggplot() +
   geom_spatraster(data=rsds_rasters_norm) +
   facet_wrap(~lyr, ncol = 4) 
 ```
+
 Here we explore more about normalized rsds data.
+
 ```{r}
 rsds_arr_norm <- as.array(rsds_rasters_norm)
 print(paste("There are nan values in downwelling shortwave flux data: ",as.character(NaN %in% rsds_arr_norm,seq='')))
@@ -391,7 +432,9 @@ print(paste("The min value of downwelling shortwave flux data (without nan): ",m
 print(paste("The max value of downwelling shortwave flux data (without nan): ",max(rsds_arr_norm,na.rm = TRUE)))
 
 ```
+
 Here we load the tas data from release and visualize them.
+
 ```{r}
 tas_filelist = c()
 month <- c("01","02","03","04","05","06","07","08","09","10","11","12")
@@ -409,7 +452,9 @@ ggplot() +
   facet_wrap(~lyr, ncol = 4) 
 
 ```
+
 Here we explore more about the original tas data.
+
 ```{r}
 tas_arr_ori <- as.array(tas_rasters)
 print(paste("There are nan values in mean daily airtemperature data: ",as.character(NaN %in% tas_arr_ori,seq='')))
@@ -419,7 +464,9 @@ print(paste("The min value of mean daily air temperature data (without nan): ",m
 print(paste("The max value of mean daily air temperature data (without nan): ",max(tas_arr_ori,na.rm = TRUE)))
 
 ```
+
 Here we normalize the tas data and visualize them.
+
 ```{r}
 tas_rasters_norm1 <- terra::rast()
 
@@ -444,7 +491,11 @@ ggplot() +
   geom_spatraster(data=tas_rasters_norm) +
   facet_wrap(~lyr, ncol = 4) 
 ```
+
+
 Here we explore more about the normalized tas data.
+
+
 ```{r}
 tas_arr_norm <- as.array(tas_rasters_norm)
 print(paste("There are nan values in mean daily airtemperature data: ",as.character(NaN %in% tas_arr_norm,seq='')))
@@ -453,7 +504,9 @@ print(paste("There are infinitive values in mean daily air temperature data: ",a
 print(paste("The min value of mean daily air temperature data (without nan): ",min(tas_arr_norm,na.rm = TRUE)))
 print(paste("The max value of mean daily air temperature data (without nan): ",max(tas_arr_norm,na.rm = TRUE)))
 ```
+
 Here we combine all the data we collected above into one spatRaster.
+
 ```{r}
 
 #pr_rasters_norm=terra::project(pr_rasters_norm,ndvi_rasters_norm)
@@ -461,7 +514,9 @@ Here we combine all the data we collected above into one spatRaster.
 all_variables_raster <- c(ndvi_rasters_norm,env_rasters_norm,pr_rasters_norm,rsds_rasters_norm,tas_rasters_norm)
 
 ```
+
 This part generate the label of the training dataset. The original data has been uploaded to the release part.
+
 ```{r}
 land_cover_type <- terra::rast("https://github.com/geo511-2022/final_project-YueMa28/releases/download/landcover_type/clipped_1990_2020.tif")
 
@@ -472,7 +527,9 @@ land_cover_arr <- as.array(land_cover_type)
 print(paste("There are nan values in the land cover data: ",as.character(NaN %in% land_cover_arr,seq='')))
 print(paste("There are infinitive values in the land cover data ",as.character(Inf %in% land_cover_arr,seq='')))
 ```
+
 Here we created a binary mask to distinguish the pixels that are shrubland from the pixels that are not. Then we visualize the mask.
+
 ```{r}
 binary_mask <- array(dim=c(1634,2035))
 
@@ -493,7 +550,9 @@ for(i in 1:1634){
 image(binary_mask,asp=1)
 
 ```
+
 Here we created a mask that distinguish pixels whose values are all valid from the pixels which contains invalid data. Then we visualize the mask.
+
 ```{r}
 #all_variables_arr <- array(dim=c(1634,2035,12,7))
 
@@ -541,6 +600,7 @@ for(i in 1:1634){
 image(all_variables_mask,asp=1)
 
 ```
+
 Here we combine the two masks we created above and select pixels to train our model. Then we visualize the combined mask.
 
 ```{r}
@@ -563,24 +623,11 @@ for(m in 1:1634){
 
 image(combine_mask,asp=1)
 print(total_valid_count)
-#1 %in% all_variables_mask
 
-#valid_number <- 0
-#for(i in 1:1634){
-#  for(j in 1:2035){
-#    if(combine_mask[i,j]==1){
-#      valid_number = valid_number + 1
-#    }
-#    else{
-#      next
-#    }
-#  }
-#}
-#valid_number
-#train_number = as.integer(valid_number*0.75)
-#test_number = as.integer(valid_number*0.25)
 ```
+
 Here we extract the time-series data from the selected pixels and combine them into two arrays. 
+
 ```{r}
 total_dataset <- array(dim = c(total_valid_count,12,7))
 total_label <- array(dim = c(total_valid_count,1))
@@ -608,7 +655,9 @@ for(m in 1:1634){
   }
 }
 ```
+
 Here we randomly split the dataset (75%-25%) as training dataset and testing dataset.
+
 ```{r}
 set.seed(10000)
 random_number <- sample(1:total_valid_count,as.integer(0.75*total_valid_count),replace=F)
@@ -631,52 +680,62 @@ for(i in 1:total_valid_count){
   }
 }
 
-#dim(train_dataset) <- c(as.integer(0.75*total_valid_count),12,7,1)
-#train_label <- to_categorical(train_label,2)
-#dim(test_dataset) <- c(as.integer(0.25*total_valid_count),12,7,1)
-#test_label <- to_categorical(test_label,2)
+dim(train_dataset) <- c(as.integer(0.75*total_valid_count),12,7,1)
+train_label <- to_categorical(train_label,2)
+dim(test_dataset) <- c(as.integer(0.25*total_valid_count),12,7,1)
+test_label <- to_categorical(test_label,2)
 ```
+
 Here we build the FCN model and train it with our training dataset. Due to the limitation of Github memory, I set the epoch to 5. Please feel free to change the epoch and batch_size number based on the memory of your server.
+
 ```{r}
-#FCN_model <-keras_model_sequential()
-#FCN_model %>%
-#  layer_conv_2d(filter=128,kernel_size=c(5,5),strides=1,padding = 'same',input_shape = c(12,7,1)) %>%
-#  layer_batch_normalization() %>%
-#  layer_activation('relu') %>%
-#  layer_conv_2d(filter=256,kernel_size=c(5,5),strides=1,padding = 'same') %>%
-#  layer_batch_normalization() %>%
-#  layer_activation('relu') %>%
-#  layer_conv_2d(filters = 128,kernel_size=c(3,3),strides=1,padding = 'same') %>%
-#  layer_batch_normalization() %>%
-#  layer_activation('relu') %>%
-#  layer_global_average_pooling_2d() %>%
-#  layer_dense(2,activation = 'softmax')
+FCN_model <-keras_model_sequential()
+FCN_model %>%
+  layer_conv_2d(filter=128,kernel_size=c(5,5),strides=1,padding = 'same',input_shape = c(12,7,1)) %>%
+  layer_batch_normalization() %>%
+  layer_activation('relu') %>%
+  layer_conv_2d(filter=256,kernel_size=c(5,5),strides=1,padding = 'same') %>%
+  layer_batch_normalization() %>%
+  layer_activation('relu') %>%
+  layer_conv_2d(filters = 128,kernel_size=c(3,3),strides=1,padding = 'same') %>%
+  layer_batch_normalization() %>%
+  layer_activation('relu') %>%
+  layer_global_average_pooling_2d() %>%
+  layer_dense(2,activation = 'softmax')
 
-#FCN_model %>% compile(
-#  optimizer = 'adam',
-#  loss = 'binary_crossentropy',
-#  metrics = c('accuracy')
-#)
+FCN_model %>% compile(
+  optimizer = 'adam',
+  loss = 'binary_crossentropy',
+  metrics = c('accuracy')
+)
 
-#history = FCN_model %>%
-#  fit(train_dataset,
-#      train_label,
-#      epoch = 5,
-#      batch_size = 10,
-#      verbose=1)
+history = FCN_model %>%
+  fit(train_dataset,
+      train_label,
+      epoch = 5,
+      batch_size = 10,
+      verbose=1)
 
 
 ```
+
 Here we show the structure of our trained model.
+
 ```{r}
-#summary(FCN_model)
+summary(FCN_model)
 ```
+
+
 # Results
 
 Here we evaluate the performance of our model based on the test dataset. Based on the loss and accuracy data calculated below, it seems that the FCN model has achieved an ideal performance. However, this results may be caused by the limited number of training data and the ratio between positive and negative labels. Detialed experience should be conducted as a follow-up research to optimaize the performance of this model.
+
+
 ```{r}
 FCN_model %>% evaluate(test_dataset, test_label)
 ```
+
+
 # Conclusions
 
 Though the model was trained with only limited datasets and limited epochs, the results still show that it is feasible to conduct land cover classification with FCN model. For next step, I plan to try different datasets and test the performance. Specifically, I plan to use different bands from hyperspectral remote sensing data to train the model instead of the environmental variables data. Different callback functions will be taken into consideration as well to achieve a better performance of FCN model.
