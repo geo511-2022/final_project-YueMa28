@@ -547,7 +547,7 @@ for(i in 1:1634){
   }
 }
 
-image(binary_mask,asp=1)
+image(binary_mask[nrow(binary_mask):1,],asp=1)
 
 ```
 
@@ -597,7 +597,7 @@ for(i in 1:1634){
   }
 }
 
-image(all_variables_mask,asp=1)
+image(all_variables_mask[nrow(all_variables_mask):1,],asp=1)
 
 ```
 

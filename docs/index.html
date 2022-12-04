@@ -935,7 +935,7 @@ for(i in 1:1634){
   }
 }
 
-image(binary_mask,asp=1)</code></pre>
+image(binary_mask[nrow(binary_mask):1,],asp=1)</code></pre>
 <p><img src="index_files/figure-html/unnamed-chunk-26-1.png" width="672" /></p>
 <p>Here we created a mask that distinguish pixels whose values are all
 valid from the pixels which contains invalid data. Then we visualize the
@@ -983,7 +983,7 @@ for(i in 1:1634){
   }
 }
 
-image(all_variables_mask,asp=1)</code></pre>
+image(all_variables_mask[nrow(all_variables_mask):1,],asp=1)</code></pre>
 <p><img src="index_files/figure-html/unnamed-chunk-27-1.png" width="672" /></p>
 <p>Here we combine the two masks we created above and select pixels to
 train our model. Then we visualize the combined mask.</p>
