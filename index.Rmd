@@ -4,7 +4,7 @@ author: Yue Ma
 subtitle: Using time series data to train deep learning model for land cover classification
 ---
 
-# Introduction
+# Introduction #I like the layout of your code. logically, it is easy to follow. 
 
 Time series data is of tremendous importance in the field of environmental sustainability. Exploring this kind of data helps us understand the pattern of ecosystems, which allows us to detect the abnormal changes in time and help the relative department to make decisions. In this study, I will use one state-of-the-art time series classification (TSC) model, fully convectional neural network (FCN) to classify the landcover type in Cape Floristic Region.
 
