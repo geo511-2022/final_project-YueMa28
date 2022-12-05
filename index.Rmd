@@ -621,8 +621,8 @@ for(m in 1:1634){
   }
 }
 
-image(combine_mask,asp=1)
-print(total_valid_count)
+image(combine_mask[nrow(combine_mask):1,],asp=1)
+
 
 ```
 

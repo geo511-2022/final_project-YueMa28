@@ -1004,10 +1004,8 @@ for(m in 1:1634){
   }
 }
 
-image(combine_mask,asp=1)</code></pre>
+image(combine_mask[nrow(combine_mask):1,],asp=1)</code></pre>
 <p><img src="index_files/figure-html/unnamed-chunk-28-1.png" width="672" /></p>
-<pre class="r"><code>print(total_valid_count)</code></pre>
-<pre><code>## [1] 517642</code></pre>
 <p>Here we extract the time-series data from the selected pixels and
 combine them into two arrays.</p>
 <pre class="r"><code>total_dataset &lt;- array(dim = c(total_valid_count,12,7))
