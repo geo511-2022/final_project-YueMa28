@@ -1,0 +1,67 @@
+---
+title: "Project Proposal by Yue Ma"
+author: Yue Ma
+output: 
+  github_document
+---
+# Introduction to problem/question
+
+Test the performance of one time series classification model
+
+# Problem / Question
+
+Time series data is of tremendous importance in the field of environmental sustainability. Exploring this kind of data helps us understand the pattern of ecosystems, which allows us to detect the abnormal changes in time and help the relative department to make decisions. In this study, I will test the performance of one state-of-the-art time series classification (TSC) model, fully convectional neural network (FCN).
+
+# Inspiring Examples
+
+## Example 1
+
+![](http://www.timeseriesclassification.com/images/datasets/Crop.jpg)
+As shown in the figure, different types of objects have different time series data features, and this kind of pattern can help us to distinguish them. Besides, by analyzing time series data, we can detect the abnormal change within one class and make according response to it.
+
+
+## Example 2
+![](https://www.esa.int/var/esa/storage/images/esa_multimedia/images/2017/10/african_land_cover/17185427-1-eng-GB/African_land_cover_pillars.jpg)
+Land cover map of Africa. My study area are Cape Floristic Region, which is located to the northwestern part of Africa.
+
+
+## Example 3
+![](https://ieeexplore.ieee.org/mediastore_new/IEEE/content/media/7958416/7965814/7966039/7966039-fig-1-source-large.gif)
+
+The structure of the FCN model is shown in the above figure. 
+
+# Proposed data sources
+
+[land cover classification dataset](https://egis.environment.gov.za/sa_national_land_cover_datasets): This dataset is released by the Forestry, Fisheries and the Environment Department of Republic of South Africa. The dataset demonstrates the land cover change in South Africa from 1990 to 2020.
+
+[NDVI data](https://lpdaac.usgs.gov/products/mod13q1v006/): The time period of the NDVI data is from 2009 to 2018.
+
+[CHELSA  dataset](https://chelsa-climate.org/downloads/): monthly precipitation data, temperature data (mean) and radiation data of study area from 2009 to 2018.
+
+[soil data](https://github.com/AdamWilsonLab/emma_envdata/releases/download/processed_static/soil_Total_N_.tif): Total N in the soil of study area. In this study I assume that the soil data of the study area does not change from 2009 to 2018.
+
+[seasonality concentration data](https://github.com/AdamWilsonLab/emma_envdata/releases/download/processed_static/MODCF_seasonality_concentration.tif): Cloud fraction seasonality concentration of the study area. In this study I assume that the seasonality concentration data of the study area does not change from 2009 to 2018.
+
+[DEM data](https://github.com/AdamWilsonLab/emma_envdata/releases/download/processed_static/nasadem.tif): the digital elevation model of study area.In this study I assume that the DEM data of the study area does not change from 2009 to 2018.
+
+The data used in this study is in two categories: static and dynamic. The precipitation data, temperature data and radiation data are considered as dynamic data while the soil data, DEM data and seasonality concentration data are considered as static data. (Another potential research question for this study is whether the static and dynamic data have same importance in this classification task)
+
+# Proposed methods
+
+This study can be divided into four parts:
+
+1) data collection and pre-processing: 
+In this part, I collected the aforementioned data and normalized them into the same value range (Except the NDVI data). The normalized value range for the NDVI data is [-1,1], while the normalized value range for the other environmental variables is (0,1]. 
+
+2) build training and testing data sets:
+Based the land cover classification data, I select pixels that do not change during the study period and build a mask based on them. This mask is then applied to select pixels from the NDVI and environmental variables data. Then the label from the classification data and the data from previous step are combined together and then splitted into training and testing datasets.
+
+3) build and train deep learning model:
+The deep learning models used in this paper is proposed in *Time series classification from scratch with deep neural networks: A strong baseline* in 2017. In this study, I will keep the original structures of the models in the paper.
+
+4) discussion:
+Based on the results I get from the previous step, the performances of these two models are analyzed and the results have referential significance to relative studies.
+
+# Expected results
+
+After the training part, I will get one trained model. Then I will use the test dataset to evaluate the performance and get the results. 
